@@ -95,7 +95,16 @@ export function Footer() {
 
         {/* Bottom Section */}
         <div className="border-t border-[#1e2d45] pt-8">
-          <div className="text-center text-gray-500 text-sm">
+          <div className="text-center text-gray-500 text-sm space-y-4">
+            <div className="flex justify-center gap-6 text-xs">
+              <Link href="/privacy" className="hover:text-[#06b6d4] transition-all">
+                Privacy Policy
+              </Link>
+              <span>•</span>
+              <Link href="/terms" className="hover:text-[#06b6d4] transition-all">
+                Terms of Service
+              </Link>
+            </div>
             <p>© 2026 AgenticRadio.ai — Built by Intragentic.com</p>
           </div>
         </div>

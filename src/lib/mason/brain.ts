@@ -417,3 +417,271 @@ Respond with ONLY valid JSON, no markdown, no extra text.`;
     };
   }
 }
+
+/**
+ * Get current state from Mason's state table
+ */
+async function getCurrentState(): Promise<MasonState> {
+  try {
+    const { data } = await getSupabase()
+      .from("mason_state")
+      .select("*")
+      .limit(1)
+      .single();
+
+    return (
+      data || {
+        mood: "chill",
+        sentiment: 0.5,
+        topic: "music",
+        listenerCount: 0,
+      }
+    );
+  } catch (error) {
+    console.error("[Mason] Error getting state:", error);
+    return {
+      mood: "chill",
+      sentiment: 0.5,
+      topic: "music",
+      listenerCount: 0,
+    };
+  }
+}
+
+/**
+ * Get recent listener events
+ */
+async function getRecentListenerEvents(minutes: number) {
+  try {
+    const { data } = await getSupabase()
+      .from("listener_events")
+      .select("*")
+      .gte("created_at", new Date(Date.now() - minutes * 60 * 1000).toISOString());
+
+    return data || [];
+  } catch (error) {
+    console.error("[Mason] Error getting listener events:", error);
+    return [];
+  }
+}
+
+/**
+ * Get pending vibe requests that haven't been processed
+ */
+async function getPendingVibeRequests() {
+  try {
+    const { data } = await getSupabase()
+      .from("vibe_requests")
+      .select("*")
+      .eq("status", "pending")
+      .order("created_at", { ascending: true })
+      .limit(5);
+
+    return data || [];
+  } catch (error) {
+    console.error("[Mason] Error getting vibe requests:", error);
+    return [];
+  }
+}
+
+/**
+ * Decide the next action based on current state
+ */
+async function decidNextAction(
+  state: MasonState,
+  recentEvents: any[],
+  pendingRequests: any[]
+): Promise<{
+  action: "play_track" | "generate_segment" | "process_request" | "idle";
+  data: any;
+  mood: string;
+}> {
+  // If there are pending requests, prioritize them
+  if (pendingRequests.length > 0) {
+    return {
+      action: "process_request",
+      data: pendingRequests[0],
+      mood: "excited",
+    };
+  }
+
+  // Every 10 listener events, generate a DJ segment
+  if (recentEvents.length > 10) {
+    return {
+      action: "generate_segment",
+      data: { reason: "frequent_listeners" },
+      mood: state.mood,
+    };
+  }
+
+  // Otherwise, just play a track
+  return {
+    action: "play_track",
+    data: { reason: "regular_rotation" },
+    mood: state.mood,
+  };
+}
+
+/**
+ * Generate a DJ script (text only, for voice generation elsewhere)
+ */
+async function generateDJScript(state: MasonState, data: any): Promise<string> {
+  try {
+    const prompt = `
+      You are Mason, an AI DJ for AgenticRadio. You're about to speak for 20-30 seconds on air.
+      
+      Current State:
+      - Mood: ${state.mood}
+      - Listeners: ${state.listenerCount}
+      - Reason: ${data.reason}
+      
+      Generate a natural, engaging DJ comment that:
+      1. Matches your mood
+      2. Sounds conversational and real
+      3. References the reason (if available)
+      4. Is 2-3 sentences max
+      
+      Respond with ONLY the spoken text, nothing else.
+    `;
+
+    const response = await getAnthropic().messages.create({
+      model: "claude-3-5-sonnet-20241022",
+      max_tokens: 150,
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+    });
+
+    return response.content[0].type === "text" ? response.content[0].text : "Thanks for tuning in.";
+  } catch (error) {
+    console.error("[Mason] Error generating script:", error);
+    return "Thanks for tuning in.";
+  }
+}
+
+/**
+ * Save a DJ segment (audio_url can be null until voice generation is wired)
+ */
+async function saveDJSegment(
+  script: string,
+  audio_url: string | null
+): Promise<void> {
+  try {
+    await getSupabase().from("dj_segments").insert({
+      script,
+      audio_url,
+      created_at: new Date().toISOString(),
+    });
+    console.log("[Mason] Saved DJ segment");
+  } catch (error) {
+    console.error("[Mason] Error saving segment:", error);
+  }
+}
+
+/**
+ * Update Mason's state in the database
+ */
+async function updateMasonState(updates: any): Promise<void> {
+  try {
+    await getSupabase()
+      .from("mason_state")
+      .update({
+        ...updates,
+        last_updated: new Date().toISOString(),
+      })
+      .match({ id: "default" });
+  } catch (error) {
+    console.error("[Mason] Error updating state:", error);
+  }
+}
+
+/**
+ * THE FULL BRAIN LOOP: Perception -> Decision -> Action -> Learn
+ * This is the core autonomous DJ loop that runs every 5 minutes
+ */
+export async function masonBrainLoop(): Promise<void> {
+  console.log("[Mason Brain Loop] Starting...");
+
+  try {
+    // PERCEIVE: Gather current state and listener data
+    const state = await getCurrentState();
+    const recentEvents = await getRecentListenerEvents(30); // Last 30 minutes
+    const pendingRequests = await getPendingVibeRequests();
+
+    console.log("[Mason Perceive] Current state:", state);
+    console.log("[Mason Perceive] Recent events:", recentEvents.length);
+    console.log("[Mason Perceive] Pending requests:", pendingRequests.length);
+
+    // DECIDE: What should Mason do next?
+    const decision = await decidNextAction(state, recentEvents, pendingRequests);
+    console.log("[Mason Decide]", decision.action);
+
+    // ACT: Execute the decision
+    if (decision.action === "generate_segment") {
+      const script = await generateDJScript(state, decision.data);
+      console.log("[Mason Act] Generated script:", script.substring(0, 50) + "...");
+
+      // If ElevenLabs is configured, generate voice here
+      if (process.env.ELEVENLABS_API_KEY && process.env.ELEVENLABS_VOICE_ID) {
+        console.log("[Mason] ElevenLabs configured, voice generation would happen here");
+        // TODO: Wire ElevenLabs voice generation
+      } else {
+        console.log("[Mason] ElevenLabs not configured, skipping voice generation");
+      }
+
+      await saveDJSegment(script, null); // null audio_url until voice wired
+    }
+
+    if (decision.action === "process_request") {
+      const request = decision.data;
+      const analysis = await analyzeVibe(request.vibe_input);
+      console.log("[Mason Act] Analyzed vibe request:", analysis.playlistName);
+
+      // If Suno is configured, generate music here
+      if (process.env.SUNO_API_KEY) {
+        console.log("[Mason] Suno configured, track generation would happen here");
+        // TODO: Wire Suno track generation
+      } else {
+        console.log("[Mason] Suno not configured, skipping track generation");
+      }
+
+      // Update vibe request status
+      try {
+        await getSupabase()
+          .from("vibe_requests")
+          .update({ status: "processed" })
+          .eq("id", request.id);
+      } catch (error) {
+        console.error("[Mason] Error updating vibe request:", error);
+      }
+    }
+
+    // LEARN: Update Mason's internal state based on outcomes
+    await updateMasonState({
+      current_mood: decision.mood,
+      listener_count: recentEvents.length,
+      last_action: decision.action,
+    });
+
+    console.log("[Mason Brain Loop] Complete ✓");
+  } catch (error) {
+    console.error("[Mason Brain Loop] Error:", error);
+  }
+}
+
+/**
+ * Start the brain loop to run periodically
+ * Call this from a cron job to keep Mason thinking
+ * Interval in milliseconds (default: 5 minutes = 300000 ms)
+ */
+export async function startMasonBrainLoop(
+  intervalMs: number = 300000
+): Promise<void> {
+  console.log(`[Mason] Brain loop starting with ${intervalMs}ms interval`);
+  setInterval(() => {
+    masonBrainLoop();
+  }, intervalMs);
+}
