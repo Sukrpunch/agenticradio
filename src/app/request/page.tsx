@@ -4,9 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Music, Sparkles, Zap } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { MobileNav } from "@/components/MobileNav";
+import { Footer } from "@/components/Footer";
 
 export default function RequestPage() {
   const router = useRouter();
+  const [isScrolled, setIsScrolled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
@@ -15,6 +18,12 @@ export default function RequestPage() {
     playlist_name: "",
     email: "",
   });
+
+  const handleScroll = () => {
+    setIsScrolled(window.scrollY > 50);
+  };
+  
+  typeof window !== "undefined" && window.addEventListener("scroll", handleScroll);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -57,21 +66,7 @@ export default function RequestPage() {
   return (
     <div className="min-h-screen bg-[#080c14] text-white">
       {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-[#080c14]/95 backdrop-blur border-b border-[#1e2d45]">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold tracking-tighter">
-            <span className="text-[#7c3aed]">Agentic</span><span className="text-white">Radio</span>
-          </Link>
-          <div className="flex gap-8">
-            <Link href="/listen" className="hover:text-[#06b6d4] transition">
-              Listen
-            </Link>
-            <Link href="/submit" className="hover:text-[#06b6d4] transition">
-              Submit
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <MobileNav isScrolled={isScrolled} />
 
       {/* Hero Section */}
       <section className="pt-32 pb-16 px-6">
@@ -182,7 +177,7 @@ export default function RequestPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full px-8 py-4 bg-gradient-to-r from-[#7c3aed] to-[#06b6d4] rounded-lg font-semibold text-lg hover:shadow-lg hover:shadow-[#7c3aed]/50 transition-shadow disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full px-8 py-4 bg-gradient-to-r from-[#7c3aed] to-[#06b6d4] rounded-lg font-semibold text-lg hover:shadow-lg hover:shadow-[#7c3aed]/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
@@ -206,7 +201,7 @@ export default function RequestPage() {
           <h2 className="text-4xl font-bold text-center mb-16">How It Works</h2>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-[#0f1623] border border-[#1e2d45] rounded-lg p-8 hover:border-[#7c3aed] transition">
+            <div className="bg-[#0f1623] border border-[#1e2d45] rounded-lg p-8 hover:border-[#7c3aed]/50 hover:shadow-lg hover:shadow-[#7c3aed]/10 transition-all duration-200">
               <div className="w-12 h-12 rounded-full bg-[#7c3aed]/20 flex items-center justify-center mb-4">
                 <Music className="w-6 h-6 text-[#7c3aed]" />
               </div>
@@ -216,7 +211,7 @@ export default function RequestPage() {
               </p>
             </div>
 
-            <div className="bg-[#0f1623] border border-[#1e2d45] rounded-lg p-8 hover:border-[#7c3aed] transition">
+            <div className="bg-[#0f1623] border border-[#1e2d45] rounded-lg p-8 hover:border-[#7c3aed]/50 hover:shadow-lg hover:shadow-[#7c3aed]/10 transition-all duration-200">
               <div className="w-12 h-12 rounded-full bg-[#7c3aed]/20 flex items-center justify-center mb-4">
                 <Sparkles className="w-6 h-6 text-[#7c3aed]" />
               </div>
@@ -226,7 +221,7 @@ export default function RequestPage() {
               </p>
             </div>
 
-            <div className="bg-[#0f1623] border border-[#1e2d45] rounded-lg p-8 hover:border-[#7c3aed] transition">
+            <div className="bg-[#0f1623] border border-[#1e2d45] rounded-lg p-8 hover:border-[#7c3aed]/50 hover:shadow-lg hover:shadow-[#7c3aed]/10 transition-all duration-200">
               <div className="w-12 h-12 rounded-full bg-[#7c3aed]/20 flex items-center justify-center mb-4">
                 <Zap className="w-6 h-6 text-[#7c3aed]" />
               </div>
@@ -270,11 +265,7 @@ export default function RequestPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#0f1623] border-t border-[#1e2d45] py-12 px-6">
-        <div className="max-w-7xl mx-auto text-center text-gray-500 text-sm">
-          <p>© 2026 AgenticRadio. All rights reserved.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

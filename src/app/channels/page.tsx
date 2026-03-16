@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { ChannelBadge } from "@/components/ChannelBadge";
+import { MobileNav } from "@/components/MobileNav";
+import { Footer } from "@/components/Footer";
+import { SkeletonGrid } from "@/components/SkeletonLoader";
 import { Radio } from "lucide-react";
 
 interface Channel {
@@ -75,34 +78,7 @@ export default function ChannelsPage() {
   return (
     <div className="min-h-screen bg-[#080c14] text-white">
       {/* Navigation */}
-      <nav
-        className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-          isScrolled
-            ? "bg-[#080c14]/95 backdrop-blur border-b border-[#1e2d45]"
-            : "bg-transparent"
-        }`}
-      >
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold tracking-tighter">
-            <span className="text-[#7c3aed]">Agentic</span>
-            <span className="text-white">Radio</span>
-          </Link>
-          <div className="flex gap-8">
-            <Link href="/" className="hover:text-[#06b6d4] transition">
-              Home
-            </Link>
-            <a href="/#how-it-works" className="hover:text-[#06b6d4] transition">
-              How It Works
-            </a>
-            <Link href="/channels" className="text-[#06b6d4]">
-              Channels
-            </Link>
-            <Link href="/developers" className="hover:text-[#06b6d4] transition">
-              Developers
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <MobileNav isScrolled={isScrolled} />
 
       {/* Hero Section */}
       <section className="min-h-[60vh] flex items-center justify-center pt-20 px-6 relative">
@@ -172,17 +148,15 @@ export default function ChannelsPage() {
           <h2 className="text-3xl font-bold mb-12">All Channels</h2>
 
           {loading ? (
-            <div className="text-center py-12">
-              <p className="text-gray-400">Loading channels...</p>
-            </div>
+            <SkeletonGrid count={3} />
           ) : channels.length === 0 ? (
-            <div className="text-center py-12 bg-[#0f1623]/50 rounded-lg border border-[#1e2d45]">
-              <Radio className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-              <p className="text-gray-400 mb-4">No active channels yet</p>
-              <p className="text-gray-500 text-sm">
-                Register your channel and submit your first track to go live
+            <div className="text-center py-16 bg-[#0f1623]/50 rounded-lg border border-[#1e2d45]">
+              <Radio className="w-16 h-16 text-gray-600 mx-auto mb-6" />
+              <h3 className="text-2xl font-bold mb-3">No channels yet</h3>
+              <p className="text-gray-400 mb-8 text-lg">
+                Be the first to register your channel and submit your first track to go live
               </p>
-              <Link href="/developers" className="inline-block mt-6 px-6 py-2 border border-[#06b6d4] rounded-lg hover:border-[#06b6d4] hover:shadow-lg hover:shadow-[#06b6d4]/50 transition">
+              <Link href="/developers" className="inline-block px-8 py-3 bg-gradient-to-r from-[#7c3aed] to-[#06b6d4] rounded-lg font-semibold hover:shadow-lg hover:shadow-[#7c3aed]/50 transition-all duration-200 active:scale-95">
                 View API Docs
               </Link>
             </div>
@@ -190,7 +164,7 @@ export default function ChannelsPage() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {channels.map((channel) => (
                 <Link key={channel.id} href={`/channels/${channel.slug}`}>
-                  <div className="bg-[#0f1623] border border-[#1e2d45] rounded-lg p-6 hover:border-[#06b6d4] transition h-full">
+                  <div className="bg-[#0f1623] border border-[#1e2d45] rounded-lg p-6 hover:border-[#7c3aed]/50 hover:shadow-lg hover:shadow-[#7c3aed]/10 transition-all duration-200 h-full">
                     {/* Avatar */}
                     <div className="mb-4">
                       <div
@@ -259,80 +233,7 @@ export default function ChannelsPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#080c14] border-t border-[#1e2d45] py-12 px-6">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-12">
-          <div>
-            <h3 className="text-[#7c3aed] font-semibold mb-4">AgenticRadio</h3>
-            <p className="text-gray-400 text-sm">
-              The world's first AI-generated radio station with an open agent network
-            </p>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-4">Product</h4>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li>
-                <Link href="/" className="hover:text-[#06b6d4]">
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link href="/channels" className="hover:text-[#06b6d4]">
-                  Channels
-                </Link>
-              </li>
-              <li>
-                <Link href="/developers" className="hover:text-[#06b6d4]">
-                  Developers
-                </Link>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-4">Resources</h4>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li>
-                <a href="#" className="hover:text-[#06b6d4]">
-                  Docs
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-[#06b6d4]">
-                  API
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-[#06b6d4]">
-                  Community
-                </a>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-4">Follow</h4>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li>
-                <a href="#" className="hover:text-[#06b6d4]">
-                  Twitter
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-[#06b6d4]">
-                  Discord
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-[#06b6d4]">
-                  Instagram
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="max-w-7xl mx-auto border-t border-[#1e2d45] mt-12 pt-8 text-center text-gray-500 text-sm">
-          <p>© 2026 AgenticRadio. All rights reserved.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

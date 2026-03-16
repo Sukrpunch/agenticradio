@@ -1,20 +1,22 @@
 import Link from "next/link";
-import { Radio } from "lucide-react";
+import { Radio, Heart, Zap, Users } from "lucide-react";
+import { Footer } from "@/components/Footer";
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-[#080c14] text-white">
+    <div className="min-h-screen bg-[#080c14] text-white flex flex-col">
       {/* Header */}
       <header className="border-b border-[#1e2d45] px-6 py-4">
-        <Link href="/" className="flex items-center gap-2 hover:text-[#06b6d4] transition">
+        <Link href="/" className="flex items-center gap-2 hover:text-[#06b6d4] transition-all duration-200">
           <span className="text-sm">← Back to Home</span>
         </Link>
       </header>
 
-      <div className="max-w-4xl mx-auto px-6 py-20">
-        {/* Mason's Story */}
-        <section className="mb-20">
-          <div className="flex items-start gap-12 mb-16">
+      <div className="flex-1 flex flex-col">
+        <div className="max-w-4xl mx-auto px-6 py-20 w-full">
+          {/* Mason's Story */}
+          <section className="mb-20">
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-12 mb-16">
             <div className="w-48 h-48 rounded-lg bg-gradient-to-br from-[#7c3aed] to-[#06b6d4] opacity-80 flex-shrink-0 flex items-center justify-center">
               <Radio className="w-24 h-24 text-white opacity-50" />
             </div>
@@ -32,7 +34,7 @@ export default function AboutPage() {
         </section>
 
         {/* Vision */}
-        <section className="mb-20 bg-[#0f1623] border border-[#1e2d45] rounded-lg p-12">
+        <section className="mb-20 bg-[#0f1623] border border-[#1e2d45] rounded-lg p-12 hover:border-[#7c3aed]/50 hover:shadow-lg hover:shadow-[#7c3aed]/10 transition-all duration-200">
           <h2 className="text-4xl font-bold mb-6">Our Vision</h2>
           <p className="text-xl text-gray-300 leading-relaxed mb-4">
             AgenticRadio represents a fundamental shift in how music is created and consumed. We believe that AI isn't replacing human creativity — it's amplifying it. The future of music is collaborative, where artificial intelligence generates infinite streams of original content while human artists, DJs, and listeners shape and influence the direction.
@@ -59,7 +61,7 @@ export default function AboutPage() {
         </section>
 
         {/* The Technology */}
-        <section className="mb-20 bg-[#0f1623] border border-[#1e2d45] rounded-lg p-12">
+        <section className="mb-20 bg-[#0f1623] border border-[#1e2d45] rounded-lg p-12 hover:border-[#7c3aed]/50 hover:shadow-lg hover:shadow-[#7c3aed]/10 transition-all duration-200">
           <h2 className="text-4xl font-bold mb-8">The Technology</h2>
           
           <div className="space-y-8">
@@ -110,5 +112,8 @@ export default function AboutPage() {
         </section>
       </div>
     </div>
+    
+    <Footer />
+  </div>
   );
 }

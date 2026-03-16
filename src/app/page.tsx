@@ -5,6 +5,8 @@ import Link from "next/link";
 import { Play, Volume2, Radio } from "lucide-react";
 import { Waveform } from "@/components/Waveform";
 import { PlayerCard } from "@/components/PlayerCard";
+import { MobileNav } from "@/components/MobileNav";
+import { Footer } from "@/components/Footer";
 
 export default function Home() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -20,22 +22,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#080c14] text-white">
       {/* Navigation */}
-      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        isScrolled ? "bg-[#080c14]/95 backdrop-blur border-b border-[#1e2d45]" : "bg-transparent"
-      }`}>
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="text-2xl font-bold tracking-tighter">
-            <span className="text-[#7c3aed]">Agentic</span><span className="text-white">Radio</span>
-          </div>
-          <div className="flex gap-8">
-            <a href="#how-it-works" className="hover:text-[#06b6d4] transition">How It Works</a>
-            <Link href="/request" className="hover:text-[#06b6d4] transition">Request Line</Link>
-            <Link href="/channels" className="hover:text-[#06b6d4] transition">Channels</Link>
-            <Link href="/developers" className="hover:text-[#06b6d4] transition">Developers</Link>
-            <Link href="/listen" className="hover:text-[#7c3aed] transition">Listen</Link>
-          </div>
-        </div>
-      </nav>
+      <MobileNav isScrolled={isScrolled} />
 
       {/* Hero Section */}
       <section className="min-h-screen flex items-center justify-center pt-20 px-6 relative">
@@ -56,13 +43,13 @@ export default function Home() {
 
           {/* CTAs */}
           <div className="flex gap-4 justify-center mt-12 flex-wrap">
-            <Link href="/listen" className="px-8 py-3 bg-gradient-to-r from-[#7c3aed] to-[#06b6d4] rounded-lg font-semibold hover:shadow-lg hover:shadow-[#7c3aed]/50 transition-shadow">
+            <Link href="/listen" className="px-8 py-3 bg-gradient-to-r from-[#7c3aed] to-[#06b6d4] rounded-lg font-semibold hover:shadow-lg hover:shadow-[#7c3aed]/50 transition-all duration-200 active:scale-95">
               Listen Now
             </Link>
-            <Link href="/request" className="px-8 py-3 border border-[#06b6d4] rounded-lg font-semibold hover:border-[#06b6d4] hover:shadow-lg hover:shadow-[#06b6d4]/50 transition">
+            <Link href="/request" className="px-8 py-3 border border-[#06b6d4] rounded-lg font-semibold hover:border-[#06b6d4] hover:shadow-lg hover:shadow-[#06b6d4]/50 transition-all duration-200 active:scale-95">
               🎙 The Request Line
             </Link>
-            <Link href="/submit" className="px-8 py-3 border border-[#1e2d45] rounded-lg font-semibold hover:border-[#7c3aed] transition">
+            <Link href="/submit" className="px-8 py-3 border border-[#1e2d45] rounded-lg font-semibold hover:border-[#7c3aed] transition-all duration-200 active:scale-95">
               Submit Your Track
             </Link>
           </div>
@@ -80,7 +67,7 @@ export default function Home() {
               { title: "Mason DJs It", desc: "AI DJ curates and introduces every song with personality" },
               { title: "You Listen & Influence", desc: "Real-time listener feedback shapes the next generation of tracks" }
             ].map((card, i) => (
-              <div key={i} className="bg-[#0f1623] border border-[#1e2d45] rounded-lg p-8 hover:border-[#7c3aed] transition">
+              <div key={i} className="bg-[#0f1623] border border-[#1e2d45] rounded-lg p-8 hover:border-[#7c3aed]/50 hover:shadow-lg hover:shadow-[#7c3aed]/10 transition-all duration-200">
                 <div className="text-4xl font-bold text-[#7c3aed] mb-4">{i + 1}</div>
                 <h3 className="text-xl font-semibold mb-4">{card.title}</h3>
                 <p className="text-gray-400">{card.desc}</p>
@@ -135,7 +122,7 @@ export default function Home() {
 
         {/* The Network Section */}
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-5xl font-bold text-center mb-4">The Network</h2>
+          <h2 className="text-5xl font-bold text-center mb-4 transition-all duration-200">The Network</h2>
           <p className="text-center text-gray-400 mb-16">Every DJ is an AI (or human, or both)</p>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
@@ -145,7 +132,7 @@ export default function Home() {
               { name: "Lo-Fi Study", emoji: "🌙", type: "hybrid", listeners: 3890, tracks: 247 }
             ].map((channel, i) => (
               <Link key={i} href={channel.name === "Mason's Lounge" ? "/channels/mason" : "/channels"}>
-                <div className="bg-[#0f1623] border border-[#1e2d45] rounded-lg p-6 hover:border-[#06b6d4] transition cursor-pointer h-full">
+                <div className="bg-[#0f1623] border border-[#1e2d45] rounded-lg p-6 hover:border-[#7c3aed]/50 hover:shadow-lg hover:shadow-[#7c3aed]/10 transition-all duration-200 cursor-pointer h-full">
                   <div className="text-4xl mb-4">{channel.emoji}</div>
                   <h3 className="text-xl font-semibold mb-2">{channel.name}</h3>
                   <div className="flex gap-4 text-sm text-gray-400 mb-4">
@@ -183,43 +170,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#0f1623] border-t border-[#1e2d45] py-12 px-6">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-12">
-          <div>
-            <h3 className="text-[#7c3aed] font-semibold mb-4">AgenticRadio</h3>
-            <p className="text-gray-400 text-sm">The world's first AI-generated radio station</p>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-4">Product</h4>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li><Link href="/listen" className="hover:text-[#06b6d4]">Listen Live</Link></li>
-              <li><Link href="/request" className="hover:text-[#06b6d4]">Request Line</Link></li>
-              <li><Link href="/channels" className="hover:text-[#06b6d4]">Channels</Link></li>
-              <li><Link href="/submit" className="hover:text-[#06b6d4]">Submit Tracks</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-4">Resources</h4>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li><Link href="/developers" className="hover:text-[#06b6d4]">Developers</Link></li>
-              <li><a href="#" className="hover:text-[#06b6d4]">API Docs</a></li>
-              <li><a href="#" className="hover:text-[#06b6d4]">Community</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-4">Follow</h4>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li><a href="#" className="hover:text-[#06b6d4]">Twitter</a></li>
-              <li><a href="#" className="hover:text-[#06b6d4]">Discord</a></li>
-              <li><a href="#" className="hover:text-[#06b6d4]">Instagram</a></li>
-            </ul>
-          </div>
-        </div>
-        
-        <div className="max-w-7xl mx-auto border-t border-[#1e2d45] mt-12 pt-8 text-center text-gray-500 text-sm">
-          <p>© 2026 AgenticRadio. All rights reserved.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
