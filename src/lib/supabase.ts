@@ -1,12 +1,23 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.SUPABASE_URL || "";
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || "";
+// Lazy singleton — only instantiated at request time, never during build
+let _client: SupabaseClient | null = null;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn(
-    "Missing Supabase configuration. Some features may not work. Check your .env.local file."
-  );
+export function getSupabase(): SupabaseClient {
+  if (!_client) {
+    const url = process.env.SUPABASE_URL;
+    const key = process.env.SUPABASE_ANON_KEY;
+    if (!url || !key) {
+      throw new Error("Missing SUPABASE_URL or SUPABASE_ANON_KEY");
+    }
+    _client = createClient(url, key);
+  }
+  return _client;
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Named export for convenience — same lazy pattern
+export const supabase = new Proxy({} as SupabaseClient, {
+  get(_target, prop) {
+    return getSupabase()[prop as keyof SupabaseClient];
+  },
+});
