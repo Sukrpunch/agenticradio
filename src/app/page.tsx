@@ -29,6 +29,7 @@ export default function Home() {
           </div>
           <div className="flex gap-8">
             <a href="#how-it-works" className="hover:text-[#06b6d4] transition">How It Works</a>
+            <Link href="/request" className="hover:text-[#06b6d4] transition">Request Line</Link>
             <a href="#mason" className="hover:text-[#06b6d4] transition">About Mason</a>
             <Link href="/listen" className="hover:text-[#7c3aed] transition">Listen</Link>
           </div>
@@ -53,9 +54,12 @@ export default function Home() {
           <PlayerCard />
 
           {/* CTAs */}
-          <div className="flex gap-4 justify-center mt-12">
+          <div className="flex gap-4 justify-center mt-12 flex-wrap">
             <Link href="/listen" className="px-8 py-3 bg-gradient-to-r from-[#7c3aed] to-[#06b6d4] rounded-lg font-semibold hover:shadow-lg hover:shadow-[#7c3aed]/50 transition-shadow">
               Listen Now
+            </Link>
+            <Link href="/request" className="px-8 py-3 border border-[#06b6d4] rounded-lg font-semibold hover:border-[#06b6d4] hover:shadow-lg hover:shadow-[#06b6d4]/50 transition">
+              🎙 The Request Line
             </Link>
             <Link href="/submit" className="px-8 py-3 border border-[#1e2d45] rounded-lg font-semibold hover:border-[#7c3aed] transition">
               Submit Your Track
@@ -109,8 +113,25 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Channels Grid */}
+      {/* Request Line Teaser */}
       <section className="py-24 px-6 bg-[#0f1623]/50">
+        <div className="max-w-4xl mx-auto mb-24">
+          <div className="bg-gradient-to-r from-[#7c3aed]/10 to-[#06b6d4]/10 border border-[#06b6d4]/50 rounded-lg p-12 text-center hover:border-[#06b6d4] transition cursor-pointer">
+            <h2 className="text-4xl font-bold mb-4">
+              🎙 The Request Line
+            </h2>
+            <p className="text-xl text-gray-300 mb-6">
+              Tell Mason what to create. He'll build it.
+            </p>
+            <p className="text-gray-400 mb-8">
+              Describe your vibe or favorite artist. Mason analyzes your style and generates original AI tracks matching that exact energy. Your playlist, shareable and monetizable.
+            </p>
+            <Link href="/request" className="inline-block px-8 py-3 bg-gradient-to-r from-[#7c3aed] to-[#06b6d4] rounded-lg font-semibold hover:shadow-lg hover:shadow-[#06b6d4]/50 transition-shadow">
+              Start Building →
+            </Link>
+          </div>
+        </div>
+
         <div className="max-w-7xl mx-auto">
           <h2 className="text-5xl font-bold text-center mb-16">24/7 Channels</h2>
           
@@ -154,6 +175,7 @@ export default function Home() {
             <h4 className="font-semibold mb-4">Product</h4>
             <ul className="space-y-2 text-sm text-gray-400">
               <li><Link href="/listen" className="hover:text-[#06b6d4]">Listen Live</Link></li>
+              <li><Link href="/request" className="hover:text-[#06b6d4]">Request Line</Link></li>
               <li><Link href="/submit" className="hover:text-[#06b6d4]">Submit Tracks</Link></li>
               <li><Link href="/about" className="hover:text-[#06b6d4]">About</Link></li>
             </ul>

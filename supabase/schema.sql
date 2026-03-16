@@ -72,14 +72,47 @@ CREATE TABLE chat_messages (
   created_at TIMESTAMP DEFAULT NOW()
 );
 
+-- Vibe Requests: stores user requests for AI-generated playlists
+CREATE TABLE vibe_requests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  vibe_input TEXT NOT NULL,
+  genre_hint TEXT,
+  mason_analysis JSONB, -- { bpm, mood, style, tags, suno_prompt }
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Playlists: shareable playlists created from vibe requests
+CREATE TABLE playlists (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  creator_email TEXT,
+  creator_handle TEXT,
+  vibe_description TEXT NOT NULL,
+  vibe_request_id UUID REFERENCES vibe_requests(id),
+  track_ids UUID[] DEFAULT '{}',
+  play_count INTEGER DEFAULT 0,
+  share_count INTEGER DEFAULT 0,
+  creator_credits INTEGER DEFAULT 0,
+  is_public BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Add playlist_id to tracks table
+ALTER TABLE tracks ADD COLUMN IF NOT EXISTS playlist_id UUID REFERENCES playlists(id);
+
 -- Create indexes for performance
 CREATE INDEX idx_tracks_status ON tracks(status);
 CREATE INDEX idx_tracks_genre ON tracks(genre);
+CREATE INDEX idx_tracks_playlist_id ON tracks(playlist_id);
 CREATE INDEX idx_listener_events_track_id ON listener_events(track_id);
 CREATE INDEX idx_listener_events_created_at ON listener_events(created_at);
 CREATE INDEX idx_chat_messages_listener_id ON chat_messages(listener_id);
 CREATE INDEX idx_chat_messages_created_at ON chat_messages(created_at);
 CREATE INDEX idx_dj_segments_created_at ON dj_segments(created_at);
+CREATE INDEX idx_playlists_slug ON playlists(slug);
+CREATE INDEX idx_playlists_creator_email ON playlists(creator_email);
+CREATE INDEX idx_vibe_requests_created_at ON vibe_requests(created_at);
 
 -- Enable Row Level Security
 ALTER TABLE tracks ENABLE ROW LEVEL SECURITY;

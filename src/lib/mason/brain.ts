@@ -325,3 +325,84 @@ export async function masonRespondToChat(message: string): Promise<string> {
     return "Thanks for the message! Keep enjoying AgenticRadio.";
   }
 }
+
+/**
+ * Vibe Analysis: Analyze a user's vibe input and generate Suno prompt
+ * This is the core of the Request Line feature
+ */
+export async function analyzeVibe(
+  input: string,
+  genreHint?: string
+): Promise<{
+  bpm: string;
+  mood: string;
+  style: string;
+  tags: string[];
+  sunoPrompt: string;
+  playlistName: string;
+}> {
+  try {
+    const systemPrompt = `You are Mason, an expert music producer and AI DJ for AgenticRadio. Your job is to analyze a listener's vibe description (artist, mood, or style) and generate a detailed, actionable Suno AI music generation prompt.
+
+When analyzing a vibe, you should:
+1. Identify the core musical elements (BPM range, mood, instruments, production style)
+2. Extract relevant style tags and influences
+3. Generate a comprehensive Suno prompt that captures the essence of what the listener wants
+4. Suggest a catchy playlist name based on the vibe
+
+Return your response as valid JSON with exactly these fields:
+{
+  "bpm": "80-95",
+  "mood": "relaxed, sun-soaked, groovy",
+  "style": "reggae-rock fusion with surf guitar and melodic vocals",
+  "tags": ["reggae", "rock", "chill", "california"],
+  "sunoPrompt": "A laid-back reggae-rock fusion track with warm, sun-soaked vibes. Features smooth surf guitar riffs, steady reggae drums, and melodic vocal harmonies. Uplifting yet chill, perfect for beach days and road trips. BPM: 80-95.",
+  "playlistName": "Sunset Reggae Sessions"
+}`;
+
+    const userPrompt = `Analyze this vibe request and generate a Suno music prompt:
+
+User Input: "${input}"
+${genreHint ? `Genre Hint: ${genreHint}` : ""}
+
+Respond with ONLY valid JSON, no markdown, no extra text.`;
+
+    const response = await anthropic.messages.create({
+      model: "claude-3-5-sonnet-20241022",
+      max_tokens: 500,
+      system: systemPrompt,
+      messages: [
+        {
+          role: "user",
+          content: userPrompt,
+        },
+      ],
+    });
+
+    const content = response.content[0].type === "text" ? response.content[0].text : "{}";
+    const parsed = JSON.parse(content);
+
+    return {
+      bpm: parsed.bpm || "90-110",
+      mood: parsed.mood || "energetic and engaging",
+      style: parsed.style || "AI-generated music",
+      tags: Array.isArray(parsed.tags) ? parsed.tags : ["ai", "generated"],
+      sunoPrompt:
+        parsed.sunoPrompt ||
+        `An AI-generated track inspired by: ${input}. ${genreHint ? `Genre: ${genreHint}` : ""}`,
+      playlistName: parsed.playlistName || `${input} Vibes`,
+    };
+  } catch (error) {
+    console.error("Error analyzing vibe:", error);
+
+    // Fallback response if Claude fails
+    return {
+      bpm: "90-110",
+      mood: "energetic and engaging",
+      style: "AI-generated music inspired by the user's request",
+      tags: ["ai", "generated"],
+      sunoPrompt: `An AI-generated track inspired by: ${input}. ${genreHint ? `Genre: ${genreHint}` : ""}`,
+      playlistName: `${input.slice(0, 30)} Vibes`,
+    };
+  }
+}
