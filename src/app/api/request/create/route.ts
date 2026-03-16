@@ -1,11 +1,17 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { analyzeVibe } from "@/lib/mason/brain";
 import { NextRequest, NextResponse } from "next/server";
 
-const supabase = createClient(
-  process.env.SUPABASE_URL || "",
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ""
-);
+let _supabase: SupabaseClient | null = null;
+function getSupabase(): SupabaseClient {
+  if (!_supabase) {
+    _supabase = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+  }
+  return _supabase;
+}
 
 // Helper: Generate URL slug from playlist name
 function generateSlug(name: string): string {
@@ -41,7 +47,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Step 1: Save vibe request to database
-    const { data: vibeRequest, error: vibeError } = await supabase
+    const { data: vibeRequest, error: vibeError } = await getSupabase()
       .from("vibe_requests")
       .insert({
         vibe_input: vibe_description,
@@ -63,7 +69,7 @@ export async function POST(request: NextRequest) {
     const analysis = await analyzeVibe(vibe_description, genre_hint);
 
     // Update vibe request with Mason's analysis
-    const { error: updateError } = await supabase
+    const { error: updateError } = await getSupabase()
       .from("vibe_requests")
       .update({
         mason_analysis: analysis,
@@ -79,7 +85,7 @@ export async function POST(request: NextRequest) {
     const slug = generateSlug(finalPlaylistName);
     const creatorHandle = generateCreatorHandle();
 
-    const { data: playlist, error: playlistError } = await supabase
+    const { data: playlist, error: playlistError } = await getSupabase()
       .from("playlists")
       .insert({
         name: finalPlaylistName,
@@ -169,7 +175,7 @@ export async function POST(request: NextRequest) {
       },
     ];
 
-    const { data: tracks, error: tracksError } = await supabase
+    const { data: tracks, error: tracksError } = await getSupabase()
       .from("tracks")
       .insert(placeholderTracks)
       .select();
@@ -182,7 +188,7 @@ export async function POST(request: NextRequest) {
     // Update playlist with track IDs
     const trackIds = tracks?.map((t: { id: string }) => t.id) || [];
     if (trackIds.length > 0) {
-      await supabase
+      await getSupabase()
         .from("playlists")
         .update({
           track_ids: trackIds,

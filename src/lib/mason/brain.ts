@@ -6,18 +6,29 @@
  * → LEARNS from outcomes to improve future decisions.
  */
 
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import Anthropic from "@anthropic-ai/sdk";
 
-// Initialize clients
-const supabase = createClient(
-  process.env.SUPABASE_URL || "",
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ""
-);
+// Lazy clients — never instantiated at build time
+let _supabase: SupabaseClient | null = null;
+let _anthropic: Anthropic | null = null;
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+function getSupabase(): SupabaseClient {
+  if (!_supabase) {
+    _supabase = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+  }
+  return _supabase;
+}
+
+function getAnthropic(): Anthropic {
+  if (!_anthropic) {
+    _anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  }
+  return _anthropic;
+}
 
 interface MasonState {
   mood: "excited" | "chill" | "reflective" | "playful" | "thoughtful";
@@ -46,14 +57,14 @@ interface DJComment {
 async function perceive(): Promise<MasonState> {
   try {
     // Get Mason's current state
-    const { data: masonState } = await supabase
+    const { data: masonState } = await getSupabase()
       .from("mason_state")
       .select("*")
       .limit(1)
       .single();
 
     // Get listener count (from active listeners in the last 5 minutes)
-    const { data: recentEvents } = await supabase
+    const { data: recentEvents } = await getSupabase()
       .from("listener_events")
       .select("listener_id")
       .gte("created_at", new Date(Date.now() - 5 * 60 * 1000).toISOString());
@@ -63,7 +74,7 @@ async function perceive(): Promise<MasonState> {
     ).size;
 
     // Get trending tracks
-    const { data: trendingTracks } = await supabase
+    const { data: trendingTracks } = await getSupabase()
       .from("tracks")
       .select("*")
       .eq("status", "approved")
@@ -71,7 +82,7 @@ async function perceive(): Promise<MasonState> {
       .limit(5);
 
     // Get recent chat messages to gauge listener sentiment
-    const { data: recentMessages } = await supabase
+    const { data: recentMessages } = await getSupabase()
       .from("chat_messages")
       .select("message_text, created_at")
       .gte("created_at", new Date(Date.now() - 30 * 60 * 1000).toISOString())
@@ -125,7 +136,7 @@ async function decide(
       Respond with ONLY the DJ comment, nothing else.
     `;
 
-    const response = await anthropic.messages.create({
+    const response = await getAnthropic().messages.create({
       model: "claude-3-5-sonnet-20241022",
       max_tokens: 150,
       messages: [
@@ -168,7 +179,7 @@ async function act(djComment: DJComment): Promise<void> {
     console.log("Mood:", djComment.mood);
 
     // Update Mason's state
-    await supabase
+    await getSupabase()
       .from("mason_state")
       .update({
         current_mood: djComment.mood,
@@ -186,7 +197,7 @@ async function act(djComment: DJComment): Promise<void> {
 async function learn(trackId: string): Promise<void> {
   try {
     // Get performance metrics for the track
-    const { data: trackEvents } = await supabase
+    const { data: trackEvents } = await getSupabase()
       .from("listener_events")
       .select("*")
       .eq("track_id", trackId)
@@ -201,7 +212,7 @@ async function learn(trackId: string): Promise<void> {
     const favoriteRate = plays > 0 ? favorites / plays : 0;
 
     // Update track performance
-    await supabase
+    await getSupabase()
       .from("tracks")
       .update({
         plays: plays + 1,
@@ -241,7 +252,7 @@ export async function masonPulse(): Promise<void> {
     console.log("[Perceive] Current state:", state);
 
     // Get current or next track
-    const { data: tracks } = await supabase
+    const { data: tracks } = await getSupabase()
       .from("tracks")
       .select("*")
       .eq("status", "approved")
@@ -287,7 +298,7 @@ export async function getMasonRecommendation(
   listenerGenrePreferences: string[]
 ): Promise<Track | null> {
   try {
-    const { data: tracks } = await supabase
+    const { data: tracks } = await getSupabase()
       .from("tracks")
       .select("*")
       .eq("status", "approved")
@@ -308,7 +319,7 @@ export async function getMasonRecommendation(
  */
 export async function masonRespondToChat(message: string): Promise<string> {
   try {
-    const response = await anthropic.messages.create({
+    const response = await getAnthropic().messages.create({
       model: "claude-3-5-sonnet-20241022",
       max_tokens: 200,
       messages: [
@@ -367,7 +378,7 @@ ${genreHint ? `Genre Hint: ${genreHint}` : ""}
 
 Respond with ONLY valid JSON, no markdown, no extra text.`;
 
-    const response = await anthropic.messages.create({
+    const response = await getAnthropic().messages.create({
       model: "claude-3-5-sonnet-20241022",
       max_tokens: 500,
       system: systemPrompt,
