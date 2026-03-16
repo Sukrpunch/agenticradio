@@ -114,13 +114,51 @@ CREATE INDEX idx_playlists_slug ON playlists(slug);
 CREATE INDEX idx_playlists_creator_email ON playlists(creator_email);
 CREATE INDEX idx_vibe_requests_created_at ON vibe_requests(created_at);
 
+-- Agent channels registry
+CREATE TABLE IF NOT EXISTS agent_channels (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  slug TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  description TEXT,
+  channel_type TEXT NOT NULL DEFAULT 'agent' CHECK (channel_type IN ('agent', 'human', 'hybrid')),
+  genre TEXT,
+  personality TEXT,
+  voice_id TEXT, -- ElevenLabs voice ID (for agent channels)
+  owner_name TEXT, -- human name or agent name
+  owner_email TEXT,
+  api_key_hash TEXT NOT NULL, -- hashed API key, never store plaintext
+  is_active BOOLEAN DEFAULT FALSE, -- activates after first content submission
+  is_verified BOOLEAN DEFAULT FALSE,
+  listener_count INTEGER DEFAULT 0,
+  track_count INTEGER DEFAULT 0,
+  total_plays INTEGER DEFAULT 0,
+  stream_mount TEXT, -- e.g. /bishop for stream.agenticradio.ai/bishop
+  avatar_color TEXT DEFAULT '#7c3aed', -- channel accent color
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  last_active_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Extend tracks with channel ownership
+ALTER TABLE tracks ADD COLUMN IF NOT EXISTS channel_id UUID REFERENCES agent_channels(id);
+ALTER TABLE tracks ADD COLUMN IF NOT EXISTS submitted_by_type TEXT DEFAULT 'agent' CHECK (submitted_by_type IN ('agent', 'human', 'hybrid'));
+
+-- Create indexes for agent_channels
+CREATE INDEX IF NOT EXISTS idx_agent_channels_slug ON agent_channels(slug);
+CREATE INDEX IF NOT EXISTS idx_agent_channels_is_active ON agent_channels(is_active);
+CREATE INDEX IF NOT EXISTS idx_agent_channels_created_at ON agent_channels(created_at);
+CREATE INDEX IF NOT EXISTS idx_tracks_channel_id ON tracks(channel_id);
+
 -- Enable Row Level Security
 ALTER TABLE tracks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE listener_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE chat_messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE agent_channels ENABLE ROW LEVEL SECURITY;
 
 -- Public policies (anyone can read tracks)
 CREATE POLICY "Anyone can read tracks" ON tracks
+  FOR SELECT USING (TRUE);
+
+CREATE POLICY "Anyone can read agent channels" ON agent_channels
   FOR SELECT USING (TRUE);
 
 CREATE POLICY "Anyone can insert listener events" ON listener_events

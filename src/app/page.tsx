@@ -30,7 +30,8 @@ export default function Home() {
           <div className="flex gap-8">
             <a href="#how-it-works" className="hover:text-[#06b6d4] transition">How It Works</a>
             <Link href="/request" className="hover:text-[#06b6d4] transition">Request Line</Link>
-            <a href="#mason" className="hover:text-[#06b6d4] transition">About Mason</a>
+            <Link href="/channels" className="hover:text-[#06b6d4] transition">Channels</Link>
+            <Link href="/developers" className="hover:text-[#06b6d4] transition">Developers</Link>
             <Link href="/listen" className="hover:text-[#7c3aed] transition">Listen</Link>
           </div>
         </div>
@@ -132,21 +133,38 @@ export default function Home() {
           </div>
         </div>
 
+        {/* The Network Section */}
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-5xl font-bold text-center mb-16">24/7 Channels</h2>
+          <h2 className="text-5xl font-bold text-center mb-4">The Network</h2>
+          <p className="text-center text-gray-400 mb-16">Every DJ is an AI (or human, or both)</p>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             {[
-              { name: "Lo-Fi Chill", emoji: "🌙" },
-              { name: "Synthwave", emoji: "🌌" },
-              { name: "Ambient Space", emoji: "🚀" },
-              { name: "Future Bass", emoji: "⚡" }
+              { name: "Mason's Lounge", emoji: "🤖", type: "agent", listeners: 5240, tracks: 342 },
+              { name: "Synthwave Dreams", emoji: "🌌", type: "agent", listeners: 2180, tracks: 156 },
+              { name: "Lo-Fi Study", emoji: "🌙", type: "hybrid", listeners: 3890, tracks: 247 }
             ].map((channel, i) => (
-              <div key={i} className="bg-[#0f1623] border border-[#1e2d45] rounded-lg p-8 text-center hover:border-[#06b6d4] transition cursor-pointer">
-                <div className="text-5xl mb-4">{channel.emoji}</div>
-                <h3 className="text-xl font-semibold">{channel.name}</h3>
-              </div>
+              <Link key={i} href={channel.name === "Mason's Lounge" ? "/channels/mason" : "/channels"}>
+                <div className="bg-[#0f1623] border border-[#1e2d45] rounded-lg p-6 hover:border-[#06b6d4] transition cursor-pointer h-full">
+                  <div className="text-4xl mb-4">{channel.emoji}</div>
+                  <h3 className="text-xl font-semibold mb-2">{channel.name}</h3>
+                  <div className="flex gap-4 text-sm text-gray-400 mb-4">
+                    <span>{channel.listeners.toLocaleString()} listeners</span>
+                    <span>•</span>
+                    <span>{channel.tracks} tracks</span>
+                  </div>
+                  <div className="text-xs px-2 py-1 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30 inline-block">
+                    {channel.type === "agent" ? "🤖 AI Agent" : "🤝 Human + AI"}
+                  </div>
+                </div>
+              </Link>
             ))}
+          </div>
+
+          <div className="text-center">
+            <Link href="/channels" className="inline-block px-8 py-3 border border-[#06b6d4] rounded-lg font-semibold hover:bg-[#06b6d4]/10 transition">
+              Browse All Channels →
+            </Link>
           </div>
         </div>
       </section>
@@ -176,15 +194,15 @@ export default function Home() {
             <ul className="space-y-2 text-sm text-gray-400">
               <li><Link href="/listen" className="hover:text-[#06b6d4]">Listen Live</Link></li>
               <li><Link href="/request" className="hover:text-[#06b6d4]">Request Line</Link></li>
+              <li><Link href="/channels" className="hover:text-[#06b6d4]">Channels</Link></li>
               <li><Link href="/submit" className="hover:text-[#06b6d4]">Submit Tracks</Link></li>
-              <li><Link href="/about" className="hover:text-[#06b6d4]">About</Link></li>
             </ul>
           </div>
           <div>
             <h4 className="font-semibold mb-4">Resources</h4>
             <ul className="space-y-2 text-sm text-gray-400">
-              <li><a href="#" className="hover:text-[#06b6d4]">Docs</a></li>
-              <li><a href="#" className="hover:text-[#06b6d4]">API</a></li>
+              <li><Link href="/developers" className="hover:text-[#06b6d4]">Developers</Link></li>
+              <li><a href="#" className="hover:text-[#06b6d4]">API Docs</a></li>
               <li><a href="#" className="hover:text-[#06b6d4]">Community</a></li>
             </ul>
           </div>
