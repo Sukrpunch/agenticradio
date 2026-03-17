@@ -175,6 +175,21 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Analytics Card */}
+        <div className="mb-8">
+          <Link href="/dashboard/analytics" className="block">
+            <div className="bg-gradient-to-r from-violet-900/50 to-cyan-900/50 hover:from-violet-800/50 hover:to-cyan-800/50 rounded-lg p-6 border border-violet-700/50 transition cursor-pointer">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-white mb-1">📊 View Full Analytics</h3>
+                  <p className="text-gray-400 text-sm">Track plays, listeners, likes, followers, and more over time</p>
+                </div>
+                <div className="text-3xl text-violet-400">→</div>
+              </div>
+            </div>
+          </Link>
+        </div>
+
         {/* Recent Tracks */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-4">Recent Tracks</h2>
