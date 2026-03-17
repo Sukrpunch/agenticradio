@@ -6,9 +6,19 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+// Helper function to generate slug from name
+function generateSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+}
+
 /**
- * POST /api/tracks
- * Create a new track
+ * POST /api/stations
+ * Create a new community station
  */
 export async function POST(request: NextRequest) {
   try {
@@ -18,41 +28,50 @@ export async function POST(request: NextRequest) {
     }
 
     const token = authHeader.slice(7);
-
-    // Verify the token
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    
+
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await request.json();
 
-    // Validate required fields
-    if (!body.title || !body.audio_url) {
+    if (!body.name || !body.theme) {
       return NextResponse.json(
-        { error: 'Missing required fields: title, audio_url' },
+        { error: 'Missing required fields: name, theme' },
         { status: 400 }
       );
     }
 
-    // Create track
+    const slug = generateSlug(body.name);
+
+    // Check if slug already exists
+    const { data: existingStation } = await supabase
+      .from('stations')
+      .select('id')
+      .eq('slug', slug)
+      .single();
+
+    if (existingStation) {
+      return NextResponse.json(
+        { error: 'A station with this name already exists' },
+        { status: 400 }
+      );
+    }
+
     const { data, error } = await supabase
-      .from('tracks')
+      .from('stations')
       .insert({
-        creator_id: user.id,
-        title: body.title,
-        genre: body.genre || 'Other',
-        mood: body.mood || null,
-        audio_url: body.audio_url,
+        name: body.name,
+        slug,
+        theme: body.theme,
+        description: body.description || null,
+        owner_id: user.id,
+        is_public: body.is_public !== false,
         cover_url: body.cover_url || null,
-        duration_ms: body.duration_ms || null,
-        tags: body.tags || [],
-        status: body.status || 'published',
-        play_count: 0,
-        like_count: 0,
-        is_collab: body.is_collab || false,
-        is_remix: body.is_remix || false
+        track_ids: [],
+        track_count: 0,
+        follower_count: 0,
       })
       .select()
       .single();
@@ -71,42 +90,34 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * GET /api/tracks
- * List tracks for the current user (dashboard)
+ * GET /api/stations
+ * List public stations sorted by follower count
  */
 export async function GET(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const token = authHeader.slice(7);
-
-    // Verify the token
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get('limit') || '10', 10);
-    const offset = parseInt(searchParams.get('offset') || '0', 10);
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const limit = parseInt(searchParams.get('limit') || '20', 10);
+    const offset = (page - 1) * limit;
 
-    // Get user's tracks
-    const { data, error } = await supabase
-      .from('tracks')
-      .select('*')
-      .eq('creator_id', user.id)
-      .order('created_at', { ascending: false })
+    const { data, count, error } = await supabase
+      .from('stations')
+      .select('*, profiles:owner_id(username)', { count: 'exact' })
+      .eq('is_public', true)
+      .order('follower_count', { ascending: false })
       .range(offset, offset + limit - 1);
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json(data || []);
+    return NextResponse.json({
+      stations: data || [],
+      total: count || 0,
+      page,
+      limit,
+      pages: Math.ceil((count || 0) / limit),
+    });
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message || 'Internal server error' },

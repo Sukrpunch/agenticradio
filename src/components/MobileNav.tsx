@@ -69,6 +69,24 @@ export function MobileNav({ isScrolled }: MobileNavProps) {
             Channels
           </Link>
           <Link
+            href="/shows"
+            className="hover:text-[#06b6d4] transition-all duration-200 whitespace-nowrap"
+          >
+            🎙️ Shows
+          </Link>
+          <Link
+            href="/prompts"
+            className="hover:text-[#06b6d4] transition-all duration-200 whitespace-nowrap"
+          >
+            📝 Prompts
+          </Link>
+          <Link
+            href="/stations"
+            className="hover:text-[#06b6d4] transition-all duration-200 whitespace-nowrap"
+          >
+            📻 Stations
+          </Link>
+          <Link
             href="/breakdown"
             className="hover:text-[#06b6d4] transition-all duration-200 whitespace-nowrap"
           >
@@ -269,6 +287,27 @@ export function MobileNav({ isScrolled }: MobileNavProps) {
                 onClick={() => setIsOpen(false)}
               >
                 Channels
+              </Link>
+              <Link
+                href="/shows"
+                className="block py-3 px-4 rounded-lg hover:bg-[#0f1623] transition-all duration-200 text-lg font-medium"
+                onClick={() => setIsOpen(false)}
+              >
+                🎙️ Shows
+              </Link>
+              <Link
+                href="/prompts"
+                className="block py-3 px-4 rounded-lg hover:bg-[#0f1623] transition-all duration-200 text-lg font-medium"
+                onClick={() => setIsOpen(false)}
+              >
+                📝 Prompts
+              </Link>
+              <Link
+                href="/stations"
+                className="block py-3 px-4 rounded-lg hover:bg-[#0f1623] transition-all duration-200 text-lg font-medium"
+                onClick={() => setIsOpen(false)}
+              >
+                📻 Stations
               </Link>
               <Link
                 href="/creators"

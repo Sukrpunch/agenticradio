@@ -7,8 +7,8 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 /**
- * POST /api/tracks
- * Create a new track
+ * POST /api/prompts
+ * Create a new prompt archive entry
  */
 export async function POST(request: NextRequest) {
   try {
@@ -18,41 +18,33 @@ export async function POST(request: NextRequest) {
     }
 
     const token = authHeader.slice(7);
-
-    // Verify the token
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    
+
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await request.json();
 
-    // Validate required fields
-    if (!body.title || !body.audio_url) {
+    if (!body.prompt || !body.tool) {
       return NextResponse.json(
-        { error: 'Missing required fields: title, audio_url' },
+        { error: 'Missing required fields: prompt, tool' },
         { status: 400 }
       );
     }
 
-    // Create track
     const { data, error } = await supabase
-      .from('tracks')
+      .from('prompt_archive')
       .insert({
         creator_id: user.id,
-        title: body.title,
-        genre: body.genre || 'Other',
-        mood: body.mood || null,
-        audio_url: body.audio_url,
-        cover_url: body.cover_url || null,
-        duration_ms: body.duration_ms || null,
+        track_id: body.track_id || null,
+        tool: body.tool,
+        tool_version: body.tool_version || null,
+        prompt: body.prompt,
+        settings: body.settings || {},
+        genre: body.genre || null,
         tags: body.tags || [],
-        status: body.status || 'published',
-        play_count: 0,
-        like_count: 0,
-        is_collab: body.is_collab || false,
-        is_remix: body.is_remix || false
+        use_count: 0,
       })
       .select()
       .single();
@@ -71,42 +63,51 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * GET /api/tracks
- * List tracks for the current user (dashboard)
+ * GET /api/prompts
+ * Search and list prompts from archive
+ * Query params: tool, q (search query), genre, page, limit
  */
 export async function GET(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const token = authHeader.slice(7);
-
-    // Verify the token
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get('limit') || '10', 10);
-    const offset = parseInt(searchParams.get('offset') || '0', 10);
+    const tool = searchParams.get('tool');
+    const q = searchParams.get('q');
+    const genre = searchParams.get('genre');
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const limit = parseInt(searchParams.get('limit') || '20', 10);
+    const offset = (page - 1) * limit;
 
-    // Get user's tracks
-    const { data, error } = await supabase
-      .from('tracks')
-      .select('*')
-      .eq('creator_id', user.id)
-      .order('created_at', { ascending: false })
+    let query = supabase
+      .from('prompt_archive')
+      .select('*, profiles:creator_id(username)', { count: 'exact' });
+
+    if (tool) {
+      query = query.eq('tool', tool);
+    }
+
+    if (genre) {
+      query = query.eq('genre', genre);
+    }
+
+    if (q) {
+      query = query.ilike('prompt', `%${q}%`);
+    }
+
+    const { data, count, error } = await query
+      .order('use_count', { ascending: false })
       .range(offset, offset + limit - 1);
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json(data || []);
+    return NextResponse.json({
+      prompts: data || [],
+      total: count || 0,
+      page,
+      limit,
+      pages: Math.ceil((count || 0) / limit),
+    });
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message || 'Internal server error' },
