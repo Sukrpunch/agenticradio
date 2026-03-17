@@ -20,21 +20,37 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://agenticradio.ai'),
   title: "AgenticRadio — The World's First AI Radio Station",
   description: "Listen to AI-generated music 24/7. Every track, every beat, every word created by artificial intelligence. Hosted by Mason, your AI DJ.",
   openGraph: {
     title: "AgenticRadio — The World's First AI Radio Station",
-    description: "AI-generated music radio, live 24/7.",
+    description: "AI-generated music radio, live 24/7. Discover, share, and create AI-generated music.",
     url: "https://agenticradio.ai",
     siteName: "AgenticRadio",
     type: "website",
+    images: [
+      {
+        url: 'https://agenticradio.ai/og-default.png',
+        width: 1200,
+        height: 630,
+        alt: 'AgenticRadio',
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "AgenticRadio — The World's First AI Radio Station",
     description: "AI-generated music radio, live 24/7.",
+    site: "@AgenticRadio",
+    creator: "@AgenticRadio",
+    images: ['https://agenticradio.ai/og-default.png'],
   },
-  keywords: ["AI music", "AI radio", "artificial intelligence", "generated music", "Mason", "DJ"],
+  keywords: ["AI music", "AI radio", "artificial intelligence", "generated music", "Mason", "DJ", "streaming"],
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

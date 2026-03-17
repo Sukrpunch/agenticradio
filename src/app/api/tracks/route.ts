@@ -61,6 +61,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    // Insert activity feed event for track upload
+    if (data) {
+      await supabase.from('activity_feed').insert({
+        type: 'track_upload',
+        actor_id: user.id,
+        track_id: data.id,
+        metadata: {
+          title: data.title,
+          genre: data.genre,
+        },
+        is_public: true,
+      }).catch((err) => {
+        // Log error but don't fail the request
+        console.error('Failed to insert activity event:', err);
+      });
+    }
+
     return NextResponse.json(data, { status: 201 });
   } catch (error: any) {
     return NextResponse.json(

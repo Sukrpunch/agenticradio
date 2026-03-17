@@ -93,6 +93,12 @@ export function MobileNav({ isScrolled }: MobileNavProps) {
             📊 Breakdown
           </Link>
           <Link
+            href="/activity"
+            className="hover:text-[#06b6d4] transition-all duration-200 whitespace-nowrap"
+          >
+            🌊 Activity
+          </Link>
+          <Link
             href="/creators"
             className="hover:text-[#06b6d4] transition-all duration-200 whitespace-nowrap"
           >
@@ -308,6 +314,13 @@ export function MobileNav({ isScrolled }: MobileNavProps) {
                 onClick={() => setIsOpen(false)}
               >
                 📻 Stations
+              </Link>
+              <Link
+                href="/activity"
+                className="block py-3 px-4 rounded-lg hover:bg-[#0f1623] transition-all duration-200 text-lg font-medium"
+                onClick={() => setIsOpen(false)}
+              >
+                🌊 Activity
               </Link>
               <Link
                 href="/creators"

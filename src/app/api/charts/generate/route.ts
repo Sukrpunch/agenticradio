@@ -172,6 +172,38 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: insertError.message }, { status: 500 });
     }
 
+    // Insert activity feed events for chart #1 positions
+    if (inserted && inserted.length > 0) {
+      const chartNumberOneEntry = inserted.find((e: any) => e.position === 1);
+      
+      if (chartNumberOneEntry) {
+        // Get the track to find creator
+        const { data: track } = await supabase
+          .from('tracks')
+          .select('id, title, creator_id')
+          .eq('id', chartNumberOneEntry.track_id)
+          .single();
+
+        if (track) {
+          await supabase
+            .from('activity_feed')
+            .insert({
+              type: 'chart_number_one',
+              actor_id: track.creator_id,
+              track_id: track.id,
+              metadata: {
+                title: track.title,
+                week_start: weekStartStr,
+              },
+              is_public: true,
+            })
+            .catch((err) => {
+              console.error('Failed to insert chart_number_one activity:', err);
+            });
+        }
+      }
+    }
+
     return NextResponse.json({
       message: 'Chart generated successfully',
       week_start: weekStartStr,
