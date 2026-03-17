@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { sendPushToUser } from '@/lib/push/sendPush';
 
 const supabaseUrl = process.env.SUPABASE_URL!;
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -27,6 +28,13 @@ export async function POST(request: NextRequest) {
 
     const followerId = data.user.id;
 
+    // Get follower profile info for notification message
+    const { data: followerProfile } = await supabase
+      .from('profiles')
+      .select('display_name, username')
+      .eq('id', followerId)
+      .single();
+
     // Insert follow relationship
     const { error: followError } = await supabase.from('follows').insert({
       follower_id: followerId,
@@ -36,6 +44,14 @@ export async function POST(request: NextRequest) {
     if (followError) {
       return NextResponse.json({ error: followError.message }, { status: 400 });
     }
+
+    // Send push notification (async, don't wait)
+    const followerName = followerProfile?.display_name || 'Someone';
+    sendPushToUser(target_user_id, {
+      title: 'AgenticRadio',
+      body: `${followerName} started following you`,
+      url: `/creators/${followerProfile?.username || followerId}`
+    }).catch(err => console.error('Failed to send push notification:', err));
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

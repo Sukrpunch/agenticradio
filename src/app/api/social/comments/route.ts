@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { sendPushToUser } from '@/lib/push/sendPush';
 
 const supabaseUrl = process.env.SUPABASE_URL!;
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -83,6 +84,28 @@ export async function POST(request: NextRequest) {
       .from('tracks')
       .update({ comment_count: supabase.raw('comment_count + 1') })
       .eq('id', track_id);
+
+    // Send push notification to track owner (async, don't wait)
+    const { data: track } = await supabase
+      .from('tracks')
+      .select('creator_id')
+      .eq('id', track_id)
+      .single();
+
+    if (track && track.creator_id && track.creator_id !== data.user.id) {
+      const { data: commenterProfile } = await supabase
+        .from('profiles')
+        .select('display_name, username')
+        .eq('id', data.user.id)
+        .single();
+
+      const commenterName = commenterProfile?.display_name || 'Someone';
+      sendPushToUser(track.creator_id, {
+        title: 'AgenticRadio',
+        body: `${commenterName} commented on your track`,
+        url: `/listen?track=${track_id}`
+      }).catch(err => console.error('Failed to send push notification:', err));
+    }
 
     return NextResponse.json({ data: commentData }, { status: 201 });
   } catch (error: any) {

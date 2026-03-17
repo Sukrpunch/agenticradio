@@ -4,6 +4,8 @@ import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { AuthModalProvider } from "@/context/AuthModalContext";
 import { AuthModal } from "@/components/auth/AuthModal";
+import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
+import { PushPermissionPrompt } from "@/components/notifications/PushPermissionPrompt";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,9 +45,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#080c14] text-white`}
       >
+        <ServiceWorkerRegister />
         <AuthProvider>
           <AuthModalProvider>
             <AuthModal />
+            <PushPermissionPrompt />
             {children}
           </AuthModalProvider>
         </AuthProvider>

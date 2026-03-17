@@ -75,14 +75,37 @@ export function NotificationBell() {
     }
   };
 
-  // Poll for new notifications every 60 seconds
+  // Initial fetch and Realtime subscription
   useEffect(() => {
-    if (!user) return;
+    if (!user?.id) return;
 
     fetchNotifications(); // Initial fetch
-    const interval = setInterval(fetchNotifications, 60000);
-    return () => clearInterval(interval);
-  }, [user]);
+
+    // Subscribe to realtime notifications
+    const channel = supabase
+      .channel(`notifications:${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('New notification received:', payload);
+          // Add new notification to top of list
+          const newNotification = payload.new as Notification;
+          setNotifications(prev => [newNotification, ...prev]);
+          setUnreadCount(prev => prev + 1);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
