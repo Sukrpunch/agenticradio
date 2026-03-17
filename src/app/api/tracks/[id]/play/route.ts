@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { awardAGNT, AGNT_REWARDS } from "@/lib/agnt";
 
 function getServiceClient() {
   return createClient(
@@ -10,7 +11,7 @@ function getServiceClient() {
 
 /**
  * POST /api/tracks/[id]/play
- * Increment plays counter for a track
+ * Increment plays counter for a track and award AGNT if plays hit multiples of 100
  */
 export async function POST(
   request: NextRequest,
@@ -28,10 +29,10 @@ export async function POST(
 
     const supabase = getServiceClient();
 
-    // Fetch current plays count
+    // Fetch current plays count and track owner
     const { data: track, error: fetchError } = await supabase
       .from("tracks")
-      .select("plays")
+      .select("plays, creator_id")
       .eq("id", trackId)
       .single();
 
@@ -43,7 +44,8 @@ export async function POST(
     }
 
     // Increment plays counter
-    const newPlays = (track.plays || 0) + 1;
+    const oldPlays = track.plays || 0;
+    const newPlays = oldPlays + 1;
     const { error: updateError } = await supabase
       .from("tracks")
       .update({ plays: newPlays })
@@ -54,6 +56,15 @@ export async function POST(
       return NextResponse.json(
         { error: "Failed to update play count" },
         { status: 500 }
+      );
+    }
+
+    // Award AGNT if plays hit a multiple of 100
+    if (newPlays % 100 === 0 && track.creator_id) {
+      await awardAGNT(
+        track.creator_id,
+        AGNT_REWARDS.PLAY_100,
+        `PLAY_100_MILESTONE_${newPlays}`
       );
     }
 

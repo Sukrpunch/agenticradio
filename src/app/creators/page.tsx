@@ -274,6 +274,57 @@ export default function CreatorsPage() {
         </div>
       </section>
 
+      {/* $AGNT Token Rewards — Coming Soon */}
+      <section className="py-24 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/20 border border-amber-500/50 mb-8">
+              <span className="text-sm font-semibold text-amber-400">Coming Soon</span>
+            </div>
+            <h2 className="text-5xl font-bold mb-6 bg-gradient-to-r from-[#7c3aed] to-[#06b6d4] bg-clip-text text-transparent">
+              Earn $AGNT Tokens
+            </h2>
+            <p className="text-xl text-gray-300 mb-4">
+              Every play. Every like. Every feature. Converted to $AGNT — the Agentic empire's loyalty token.
+            </p>
+            <p className="text-sm text-zinc-400">
+              Contract: 0x78B184807C6d64C1F2A50E5E9de5D71941B3f648 on Base
+            </p>
+          </div>
+
+          {/* Earn rates grid */}
+          <div className="grid md:grid-cols-2 gap-6 mb-12">
+            <div className="bg-[#0f1623] border border-[#1e2d45] rounded-lg p-6 hover:border-[#7c3aed]/50 hover:shadow-lg hover:shadow-[#7c3aed]/10 transition-all duration-200">
+              <div className="text-3xl mb-3">🎵</div>
+              <p className="text-gray-300">Every 100 plays → <span className="font-bold text-[#06b6d4]">10 AGNT</span></p>
+            </div>
+
+            <div className="bg-[#0f1623] border border-[#1e2d45] rounded-lg p-6 hover:border-[#7c3aed]/50 hover:shadow-lg hover:shadow-[#7c3aed]/10 transition-all duration-200">
+              <div className="text-3xl mb-3">⭐</div>
+              <p className="text-gray-300">Track featured → <span className="font-bold text-[#06b6d4]">50 AGNT</span></p>
+            </div>
+
+            <div className="bg-[#0f1623] border border-[#1e2d45] rounded-lg p-6 hover:border-[#7c3aed]/50 hover:shadow-lg hover:shadow-[#7c3aed]/10 transition-all duration-200">
+              <div className="text-3xl mb-3">🎁</div>
+              <p className="text-gray-300">Founding Creator signup → <span className="font-bold text-[#06b6d4]">500 AGNT</span></p>
+            </div>
+
+            <div className="bg-[#0f1623] border border-[#1e2d45] rounded-lg p-6 hover:border-[#7c3aed]/50 hover:shadow-lg hover:shadow-[#7c3aed]/10 transition-all duration-200">
+              <div className="text-3xl mb-3">🤝</div>
+              <p className="text-gray-300">Referring a creator → <span className="font-bold text-[#06b6d4]">25 AGNT</span></p>
+            </div>
+          </div>
+
+          {/* Redeem section */}
+          <div className="text-center">
+            <p className="text-gray-300 text-lg">
+              Redeem at the <strong className="text-white">Agentic Store</strong> — t-shirts, hoodies, exclusive merch.
+            </p>
+            <p className="text-[#06b6d4] font-semibold mt-2">Earn it. Own it.</p>
+          </div>
+        </div>
+      </section>
+
       {/* AI Tools We Support */}
       <section className="py-24 px-6">
         <div className="max-w-7xl mx-auto">

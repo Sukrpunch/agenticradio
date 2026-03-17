@@ -1,5 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { awardAGNT, AGNT_REWARDS } from "@/lib/agnt";
+import { sendCreatorApplicationConfirmation } from "@/lib/email";
 
 function getSupabase() {
   return createClient(
@@ -83,6 +85,17 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Award Founding Creator bonus AGNT (user_id is null since pre-auth)
+    // Store email in reason for later reference
+    await awardAGNT(
+      null,
+      AGNT_REWARDS.FOUNDING_CREATOR,
+      `FOUNDING_CREATOR_SIGNUP_${email}`
+    );
+
+    // Send confirmation email (non-blocking, don't break API on failure)
+    await sendCreatorApplicationConfirmation(name, email);
 
     return NextResponse.json(
       {
