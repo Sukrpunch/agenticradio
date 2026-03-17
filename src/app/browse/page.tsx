@@ -6,6 +6,7 @@ import { MobileNav } from '@/components/MobileNav';
 import { Footer } from '@/components/Footer';
 import { useAuth, supabase } from '@/context/AuthContext';
 import { LikeButton } from '@/components/LikeButton';
+import { PersonalizedShelf } from '@/components/PersonalizedShelf';
 
 interface Track {
   id: string;
@@ -182,6 +183,9 @@ export default function BrowsePage() {
               )}
             </div>
           </div>
+
+          {/* Personalized Shelf for Discover Tab */}
+          {tab === 'discover' && <PersonalizedShelf />}
 
           {/* Empty State for Following */}
           {tab === 'following' && !loading && tracks.length === 0 && (

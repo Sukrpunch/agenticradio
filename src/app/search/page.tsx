@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { supabase } from '@/context/AuthContext';
+import { supabase, useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -30,11 +30,49 @@ interface SearchCreator {
 function SearchContent() {
   const searchParams = useSearchParams();
   const q = searchParams.get('q') || '';
+  const { user } = useAuth();
 
   const [tab, setTab] = useState<'tracks' | 'creators'>('tracks');
   const [tracks, setTracks] = useState<SearchTrack[]>([]);
   const [creators, setCreators] = useState<SearchCreator[]>([]);
   const [loading, setLoading] = useState(false);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+
+  // Fetch recent searches
+  useEffect(() => {
+    if (!user) return;
+    const fetchRecentSearches = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const response = await fetch('/api/search-history', {
+        headers: { 'Authorization': `Bearer ${session.access_token}` },
+      });
+      if (response.ok) {
+        const queries = await response.json();
+        setRecentSearches(queries);
+      }
+    };
+    fetchRecentSearches();
+  }, [user]);
+
+  // Save search to history when query changes
+  useEffect(() => {
+    if (!q.trim() || !user) return;
+    const saveSearch = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      await fetch('/api/search-history', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ query: q }),
+      });
+    };
+    const timer = setTimeout(saveSearch, 500); // Debounce
+    return () => clearTimeout(timer);
+  }, [q, user]);
 
   useEffect(() => {
     if (!q.trim()) {
@@ -253,7 +291,23 @@ function SearchContent() {
         {/* No search query */}
         {!q && (
           <div className="text-center py-12">
-            <p className="text-gray-400 text-lg">Enter a search term to find tracks or creators</p>
+            <p className="text-gray-400 text-lg mb-8">Enter a search term to find tracks or creators</p>
+            {recentSearches.length > 0 && (
+              <div>
+                <h2 className="text-xl font-semibold mb-4 text-left">Recent Searches</h2>
+                <div className="flex flex-wrap gap-2 justify-start">
+                  {recentSearches.map((query) => (
+                    <Link
+                      key={query}
+                      href={`/search?q=${encodeURIComponent(query)}`}
+                      className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-full text-sm transition"
+                    >
+                      {query}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
