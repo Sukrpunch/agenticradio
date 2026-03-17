@@ -39,6 +39,24 @@ export function MobileNav({ isScrolled }: MobileNavProps) {
             How It Works
           </a>
           <Link
+            href="/charts"
+            className="hover:text-[#06b6d4] transition-all duration-200 whitespace-nowrap"
+          >
+            🎙️ Charts
+          </Link>
+          <Link
+            href="/trending"
+            className="hover:text-[#06b6d4] transition-all duration-200 whitespace-nowrap"
+          >
+            🔥 Trending
+          </Link>
+          <Link
+            href="/challenges"
+            className="hover:text-[#06b6d4] transition-all duration-200 whitespace-nowrap"
+          >
+            ⚔️ Challenges
+          </Link>
+          <Link
             href="/request"
             className="hover:text-[#06b6d4] transition-all duration-200 whitespace-nowrap"
           >
@@ -211,6 +229,27 @@ export function MobileNav({ isScrolled }: MobileNavProps) {
               >
                 How It Works
               </a>
+              <Link
+                href="/charts"
+                className="block py-3 px-4 rounded-lg hover:bg-[#0f1623] transition-all duration-200 text-lg font-medium"
+                onClick={() => setIsOpen(false)}
+              >
+                🎙️ Charts
+              </Link>
+              <Link
+                href="/trending"
+                className="block py-3 px-4 rounded-lg hover:bg-[#0f1623] transition-all duration-200 text-lg font-medium"
+                onClick={() => setIsOpen(false)}
+              >
+                🔥 Trending
+              </Link>
+              <Link
+                href="/challenges"
+                className="block py-3 px-4 rounded-lg hover:bg-[#0f1623] transition-all duration-200 text-lg font-medium"
+                onClick={() => setIsOpen(false)}
+              >
+                ⚔️ Challenges
+              </Link>
               <Link
                 href="/request"
                 className="block py-3 px-4 rounded-lg hover:bg-[#0f1623] transition-all duration-200 text-lg font-medium"

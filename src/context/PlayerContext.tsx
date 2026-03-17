@@ -5,6 +5,7 @@ import { supabase } from './AuthContext';
 export interface Track {
   id: string;
   title: string;
+  creator_id?: string;
   creator_name?: string;
   creator_username?: string;
   audio_url: string;

@@ -4,9 +4,9 @@ import { NextRequest, NextResponse } from 'next/server';
 // GET: fetch track credits (public)
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id: trackId } = params;
+  const { id: trackId } = await params;
 
   try {
     const { data: credits, error } = await supabase
@@ -29,9 +29,9 @@ export async function GET(
 // POST/PUT: upsert credits (owner only)
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id: trackId } = params;
+  const { id: trackId } = await params;
   const authHeader = req.headers.get('authorization');
 
   if (!authHeader) {
@@ -90,7 +90,7 @@ export async function POST(
 // PUT: alias for POST
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   return POST(req, { params });
 }

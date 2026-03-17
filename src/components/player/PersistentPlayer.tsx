@@ -169,8 +169,8 @@ export function PersistentPlayer() {
           {currentTrack && (
             <TipButton
               trackId={currentTrack.id}
-              creatorId={currentTrack.creator_id}
-              creatorUsername={currentTrack.artist_handle}
+              creatorId={currentTrack.creator_id || ''}
+              creatorUsername={currentTrack.creator_username || currentTrack.creator_name || 'Unknown'}
               currentTimeMs={currentTimeMs}
             />
           )}

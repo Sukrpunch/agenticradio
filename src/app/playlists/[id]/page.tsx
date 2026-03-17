@@ -76,7 +76,10 @@ export default function PlaylistDetailPage({
   if (!playlist) return <div className="text-center py-12">Playlist not found</div>;
 
   const tracks = playlist.tracks || [];
-  const totalDuration = tracks.reduce((sum, t) => sum + (t.duration_seconds || 0), 0) / 60;
+  const totalDuration = tracks.reduce((sum, t) => {
+    const duration = (t as any).duration_ms || (t as any).duration_seconds || 0;
+    return sum + duration;
+  }, 0) / (1000 * 60);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
