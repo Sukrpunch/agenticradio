@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, X, LogOut } from "lucide-react";
+import { Menu, X, LogOut, Mail } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useAuthModal } from "@/context/AuthModalContext";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 interface MobileNavProps {
   isScrolled: boolean;
@@ -66,6 +67,16 @@ export function MobileNav({ isScrolled }: MobileNavProps) {
           >
             Listen
           </Link>
+
+          {/* Notifications & Messages (logged in only) */}
+          {user && (
+            <div className="flex items-center gap-4">
+              <NotificationBell />
+              <Link href="/messages" className="p-2 hover:text-[#06b6d4] transition-all duration-200">
+                <Mail className="w-5 h-5" />
+              </Link>
+            </div>
+          )}
 
           {/* Auth Section */}
           {user ? (

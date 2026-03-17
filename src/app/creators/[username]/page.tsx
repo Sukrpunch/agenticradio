@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { supabase } from '@/context/AuthContext';
+import { supabase, useAuth } from '@/context/AuthContext';
 import { Profile } from '@/context/AuthContext';
+import { useAuthModal } from '@/context/AuthModalContext';
 import { FollowButton } from '@/components/social/FollowButton';
 import { CollabBadge, RemixBadge } from '@/components/social/ContentBadges';
+import { Mail } from 'lucide-react';
 
 interface Track {
   id: string;
@@ -20,7 +22,10 @@ interface Track {
 
 export default function CreatorProfile() {
   const params = useParams();
+  const router = useRouter();
   const username = params.username as string;
+  const { user } = useAuth();
+  const { openModal } = useAuthModal();
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [tracks, setTracks] = useState<Track[]>([]);
@@ -127,7 +132,22 @@ export default function CreatorProfile() {
                 </div>
               </div>
 
-              <FollowButton targetUserId={profile.id} initialCount={profile.follower_count} />
+              <div className="flex gap-4">
+                <FollowButton targetUserId={profile.id} initialCount={profile.follower_count} />
+                <button
+                  onClick={() => {
+                    if (!user) {
+                      openModal();
+                    } else {
+                      router.push(`/messages?new=${profile.id}`);
+                    }
+                  }}
+                  className="flex items-center gap-2 px-6 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-medium transition-all duration-200"
+                >
+                  <Mail className="w-4 h-4" />
+                  Message
+                </button>
+              </div>
             </div>
           </div>
         </div>
