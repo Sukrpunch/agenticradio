@@ -3,7 +3,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { AuthModalProvider } from "@/context/AuthModalContext";
+import { PlayerProvider } from "@/context/PlayerContext";
 import { AuthModal } from "@/components/auth/AuthModal";
+import { PersistentPlayer } from "@/components/player/PersistentPlayer";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { PushPermissionPrompt } from "@/components/notifications/PushPermissionPrompt";
 
@@ -47,11 +49,16 @@ export default function RootLayout({
       >
         <ServiceWorkerRegister />
         <AuthProvider>
-          <AuthModalProvider>
-            <AuthModal />
-            <PushPermissionPrompt />
-            {children}
-          </AuthModalProvider>
+          <PlayerProvider>
+            <AuthModalProvider>
+              <AuthModal />
+              <PushPermissionPrompt />
+              <div className="pb-24">
+                {children}
+              </div>
+              <PersistentPlayer />
+            </AuthModalProvider>
+          </PlayerProvider>
         </AuthProvider>
       </body>
     </html>
