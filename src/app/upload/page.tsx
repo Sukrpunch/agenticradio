@@ -16,9 +16,14 @@ export default function UploadPage() {
     trackType: 'original',
     originalTrackTitle: '',
     originalTrackUrl: '',
+    parentTrackId: '',
     collaborators: '',
+    linkedVideoUrl: '',
     status: 'published'
   });
+
+  const [remixSearchResults, setRemixSearchResults] = useState<any[]>([]);
+  const [showRemixSearch, setShowRemixSearch] = useState(false);
 
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
@@ -59,6 +64,22 @@ export default function UploadPage() {
       }
       setAudioFile(file);
       setError('');
+    }
+  };
+
+  const handleRemixSearch = async (query: string) => {
+    if (!query.trim()) {
+      setRemixSearchResults([]);
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&type=tracks`);
+      if (!response.ok) return;
+      const { results } = await response.json();
+      setRemixSearchResults(results || []);
+    } catch (error) {
+      console.error('Failed to search tracks:', error);
     }
   };
 
@@ -136,22 +157,34 @@ export default function UploadPage() {
       // Insert track metadata
       const tagArray = form.tags ? form.tags.split(',').map(t => t.trim()).filter(Boolean) : [];
 
+      const trackInsert: any = {
+        creator_id: user.id,
+        title: form.title,
+        genre: form.genre,
+        tags: tagArray,
+        audio_url: audioUrl,
+        cover_url: coverUrl,
+        duration_ms: durationMs,
+        status: form.status,
+        play_count: 0,
+        like_count: 0,
+        is_collab: form.trackType === 'collab',
+        is_remix: form.trackType === 'remix'
+      };
+
+      // Add remix parent track if set
+      if (form.parentTrackId) {
+        trackInsert.parent_track_id = form.parentTrackId;
+      }
+
+      // Add linked video URL if provided
+      if (form.linkedVideoUrl) {
+        trackInsert.linked_video_url = form.linkedVideoUrl;
+      }
+
       const { data: trackData, error: insertError } = await supabase
         .from('tracks')
-        .insert({
-          creator_id: user.id,
-          title: form.title,
-          genre: form.genre,
-          tags: tagArray,
-          audio_url: audioUrl,
-          cover_url: coverUrl,
-          duration_ms: durationMs,
-          status: form.status,
-          play_count: 0,
-          like_count: 0,
-          is_collab: form.trackType === 'collab',
-          is_remix: form.trackType === 'remix'
-        })
+        .insert(trackInsert)
         .select()
         .single();
 
@@ -248,14 +281,48 @@ export default function UploadPage() {
 
           {/* Remix fields */}
           {form.trackType === 'remix' && (
-            <div className="space-y-3">
-              <input
-                type="text"
-                value={form.originalTrackTitle}
-                onChange={(e) => setForm({ ...form, originalTrackTitle: e.target.value })}
-                placeholder="Original track title"
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-violet-500"
-              />
+            <div className="bg-zinc-900/50 border border-zinc-700/50 rounded-lg p-4 space-y-3">
+              <label className="block text-sm font-medium">🔄 Remix Info</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search original track..."
+                  onFocus={() => setShowRemixSearch(true)}
+                  onChange={(e) => {
+                    handleRemixSearch(e.target.value);
+                    setForm({ ...form, originalTrackTitle: e.target.value });
+                  }}
+                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-violet-500"
+                />
+                {showRemixSearch && remixSearchResults.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-zinc-800 border border-zinc-700 rounded-lg max-h-40 overflow-y-auto z-10">
+                    {remixSearchResults.map((track) => (
+                      <button
+                        key={track.id}
+                        type="button"
+                        onClick={() => {
+                          setForm({
+                            ...form,
+                            parentTrackId: track.id,
+                            originalTrackTitle: track.title,
+                          });
+                          setShowRemixSearch(false);
+                          setRemixSearchResults([]);
+                        }}
+                        className="w-full text-left px-4 py-2 hover:bg-zinc-700 transition-colors border-b border-zinc-700/50 last:border-b-0"
+                      >
+                        <p className="text-sm font-medium">{track.title}</p>
+                        <p className="text-xs text-gray-400">
+                          by {track.creator?.display_name || 'Unknown'}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {form.parentTrackId && (
+                <p className="text-xs text-green-400">✓ Parent track selected</p>
+              )}
               <input
                 type="text"
                 value={form.originalTrackUrl}
@@ -276,6 +343,19 @@ export default function UploadPage() {
               className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-violet-500"
             />
           )}
+
+          {/* Link ATV Video (optional) */}
+          <div>
+            <label className="block text-sm font-medium mb-2">🎬 Link an ATV Video (optional)</label>
+            <input
+              type="text"
+              value={form.linkedVideoUrl}
+              onChange={(e) => setForm({ ...form, linkedVideoUrl: e.target.value })}
+              placeholder="https://agentictv.ai/videos/..."
+              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-violet-500"
+            />
+            <p className="text-xs text-gray-400 mt-1">Paste a link to your Agentic TV video to pair it with this track</p>
+          </div>
 
           {/* Audio File */}
           <div>

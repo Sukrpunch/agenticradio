@@ -50,6 +50,7 @@ export default function ConversationPage() {
   const [inputValue, setInputValue] = useState('');
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const channelRef = useRef<any>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -101,6 +102,50 @@ export default function ConversationPage() {
   useEffect(() => {
     fetchMessages();
   }, [fetchMessages]);
+
+  // Set up Realtime subscription for new messages
+  useEffect(() => {
+    if (!conversationId || !user) return;
+
+    // Subscribe to new messages in this conversation
+    const channel = supabase
+      .channel(`conversation:${conversationId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `conversation_id=eq.${conversationId}`,
+        },
+        (payload) => {
+          const newMessage = payload.new as any;
+          // Fetch full message data with sender info
+          supabase
+            .from('messages')
+            .select(
+              `
+              id, conversation_id, sender_id, body, read, created_at,
+              sender:sender_id(id, username, display_name, avatar_url)
+            `
+            )
+            .eq('id', newMessage.id)
+            .single()
+            .then(({ data: fullMessage }) => {
+              if (fullMessage) {
+                setMessages((prev) => [...prev, fullMessage as Message]);
+              }
+            });
+        }
+      )
+      .subscribe();
+
+    channelRef.current = channel;
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [conversationId, user]);
 
   // Auto-scroll to bottom
   useEffect(() => {

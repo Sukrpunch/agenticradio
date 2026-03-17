@@ -69,6 +69,12 @@ export function MobileNav({ isScrolled }: MobileNavProps) {
             Channels
           </Link>
           <Link
+            href="/breakdown"
+            className="hover:text-[#06b6d4] transition-all duration-200 whitespace-nowrap"
+          >
+            📊 Breakdown
+          </Link>
+          <Link
             href="/creators"
             className="hover:text-[#06b6d4] transition-all duration-200 whitespace-nowrap"
           >

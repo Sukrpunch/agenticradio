@@ -2,10 +2,11 @@
 import { supabase } from '@/context/AuthContext';
 import { usePlayer } from '@/context/PlayerContext';
 import { useState, useEffect } from 'react';
-import { Share2, Copy, Check } from 'lucide-react';
+import { Share2, Copy, Check, Film } from 'lucide-react';
 import Link from 'next/link';
 import { VerifiedBadge } from '@/components/creators/VerifiedBadge';
 import { WhatMadeThis } from '@/components/tracks/WhatMadeThis';
+import { RemixChain } from '@/components/tracks/RemixChain';
 import { TipButton } from '@/components/tips/TipButton';
 
 interface Track {
@@ -19,6 +20,8 @@ interface Track {
   tip_count?: number;
   duration_seconds?: number;
   genre?: string;
+  is_remix?: boolean;
+  linked_video_url?: string;
   creator?: {
     username: string;
     display_name: string;
@@ -91,7 +94,15 @@ export default function TrackDetailPage({
           />
         )}
         <div className="flex-1">
-          <h1 className="text-4xl font-bold mb-2">{track.title}</h1>
+          <div className="flex items-start gap-2 mb-2">
+            <h1 className="text-4xl font-bold">{track.title}</h1>
+            {track.is_remix && (
+              <span className="text-xl">🔄</span>
+            )}
+            {track.linked_video_url && (
+              <span className="text-xl">🎬</span>
+            )}
+          </div>
           <div className="flex items-center gap-2 mb-4">
             <p className="text-zinc-400">
               {track.creator?.display_name || track.creator?.username || track.creator_name}
@@ -112,12 +123,25 @@ export default function TrackDetailPage({
             )}
           </div>
 
-          <button
-            onClick={() => play(track)}
-            className="bg-violet-600 hover:bg-violet-500 text-white px-6 py-2 rounded-lg transition"
-          >
-            Play Track
-          </button>
+          <div className="flex gap-4">
+            <button
+              onClick={() => play(track)}
+              className="bg-violet-600 hover:bg-violet-500 text-white px-6 py-2 rounded-lg transition"
+            >
+              Play Track
+            </button>
+            {track.linked_video_url && (
+              <a
+                href={track.linked_video_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-2 rounded-lg transition flex items-center gap-2"
+              >
+                <Film size={16} />
+                Watch the Visual
+              </a>
+            )}
+          </div>
         </div>
       </div>
 
@@ -125,6 +149,13 @@ export default function TrackDetailPage({
       {track.id && (
         <div className="mb-8">
           <WhatMadeThis trackId={track.id} />
+        </div>
+      )}
+
+      {/* Remix Chain */}
+      {track.id && (
+        <div className="mb-8">
+          <RemixChain trackId={track.id} />
         </div>
       )}
 

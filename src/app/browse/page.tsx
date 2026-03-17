@@ -7,6 +7,7 @@ import { Footer } from '@/components/Footer';
 import { useAuth, supabase } from '@/context/AuthContext';
 import { LikeButton } from '@/components/LikeButton';
 import { PersonalizedShelf } from '@/components/PersonalizedShelf';
+import { DailyMix } from '@/components/recommendations/DailyMix';
 import { TipButton } from '@/components/tips/TipButton';
 import { VerifiedBadge } from '@/components/creators/VerifiedBadge';
 
@@ -160,8 +161,17 @@ export default function BrowsePage() {
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-4xl font-bold mb-6">Browse Tracks</h1>
+          </div>
 
-            {/* Tabs */}
+          {/* Daily Mix - logged in users */}
+          {user && (
+            <div className="mb-12">
+              <DailyMix />
+            </div>
+          )}
+
+          {/* Tabs */}
+          <div className="mb-8">
             <div className="flex gap-4 border-b border-[#1e2d45]">
               <button
                 onClick={() => setTab('discover')}
