@@ -39,6 +39,11 @@ export function Footer() {
                   Channels
                 </Link>
               </li>
+              <li>
+                <Link href="/creators" className="hover:text-[#06b6d4] transition-all duration-200">
+                  For Creators
+                </Link>
+              </li>
             </ul>
           </div>
 
