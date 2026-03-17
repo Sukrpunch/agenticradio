@@ -62,6 +62,12 @@ export function MobileNav({ isScrolled }: MobileNavProps) {
             Developers
           </Link>
           <Link
+            href="/browse"
+            className="hover:text-[#06b6d4] transition-all duration-200"
+          >
+            Browse
+          </Link>
+          <Link
             href="/listen"
             className="hover:text-[#7c3aed] transition-all duration-200"
           >
@@ -179,6 +185,13 @@ export function MobileNav({ isScrolled }: MobileNavProps) {
                 onClick={() => setIsOpen(false)}
               >
                 Developers
+              </Link>
+              <Link
+                href="/browse"
+                className="block py-3 px-4 rounded-lg hover:bg-[#0f1623] transition-all duration-200 text-lg font-medium"
+                onClick={() => setIsOpen(false)}
+              >
+                Browse
               </Link>
               <Link
                 href="/submit"
