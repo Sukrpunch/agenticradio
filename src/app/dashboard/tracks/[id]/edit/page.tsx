@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth, supabase } from '@/context/AuthContext';
+import { CreditsEditor } from '@/components/tracks/CreditsEditor';
 
 interface Track {
   id: string;
@@ -312,6 +313,13 @@ export default function EditTrackPage() {
             </button>
           </div>
         </form>
+
+        {/* Credits Editor */}
+        {track && (
+          <div className="mt-8">
+            <CreditsEditor trackId={track.id} />
+          </div>
+        )}
       </div>
     </div>
   );

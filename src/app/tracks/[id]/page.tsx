@@ -4,16 +4,26 @@ import { usePlayer } from '@/context/PlayerContext';
 import { useState, useEffect } from 'react';
 import { Share2, Copy, Check } from 'lucide-react';
 import Link from 'next/link';
+import { VerifiedBadge } from '@/components/creators/VerifiedBadge';
+import { WhatMadeThis } from '@/components/tracks/WhatMadeThis';
+import { TipButton } from '@/components/tips/TipButton';
 
 interface Track {
   id: string;
   title: string;
   creator_name?: string;
+  creator_id?: string;
   cover_art_url?: string;
   audio_url: string;
   like_count?: number;
+  tip_count?: number;
   duration_seconds?: number;
   genre?: string;
+  creator?: {
+    username: string;
+    display_name: string;
+    is_verified?: boolean;
+  };
 }
 
 export default function TrackDetailPage({
@@ -38,7 +48,7 @@ export default function TrackDetailPage({
     const fetchTrack = async () => {
       const { data, error } = await supabase
         .from('tracks')
-        .select('*')
+        .select('*, creator:creator_id(username, display_name, is_verified)')
         .eq('id', params.id)
         .single();
 
@@ -82,15 +92,25 @@ export default function TrackDetailPage({
         )}
         <div className="flex-1">
           <h1 className="text-4xl font-bold mb-2">{track.title}</h1>
-          {track.creator_name && (
-            <p className="text-zinc-400 mb-4">{track.creator_name}</p>
-          )}
+          <div className="flex items-center gap-2 mb-4">
+            <p className="text-zinc-400">
+              {track.creator?.display_name || track.creator?.username || track.creator_name}
+            </p>
+            {track.creator && (
+              <VerifiedBadge isVerified={track.creator.is_verified} size="md" />
+            )}
+          </div>
           {track.genre && (
             <p className="text-sm text-zinc-500 mb-4">Genre: {track.genre}</p>
           )}
-          {track.like_count !== undefined && (
-            <p className="text-sm text-zinc-500 mb-4">❤️ {track.like_count} likes</p>
-          )}
+          <div className="flex gap-4 text-sm text-zinc-500 mb-4">
+            {track.like_count !== undefined && (
+              <p>❤️ {track.like_count} likes</p>
+            )}
+            {track.tip_count !== undefined && (
+              <p>💰 {track.tip_count} tips</p>
+            )}
+          </div>
 
           <button
             onClick={() => play(track)}
@@ -100,6 +120,13 @@ export default function TrackDetailPage({
           </button>
         </div>
       </div>
+
+      {/* What Made This */}
+      {track.id && (
+        <div className="mb-8">
+          <WhatMadeThis trackId={track.id} />
+        </div>
+      )}
 
       {/* Share Section */}
       <div className="bg-zinc-800/50 rounded-lg p-6 mb-8">

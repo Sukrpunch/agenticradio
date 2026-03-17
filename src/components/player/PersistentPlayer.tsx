@@ -6,6 +6,7 @@ import { Heart, Play, Pause, SkipBack, SkipForward, Volume2, Plus } from 'lucide
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { AddToPlaylistModal } from './AddToPlaylistModal';
+import { TipButton } from '@/components/tips/TipButton';
 
 export function PersistentPlayer() {
   const { currentTrack, isPlaying, currentTimeMs, durationMs, volume, play, pause, resume, next, prev, seek, setVolume } = usePlayer();
@@ -164,6 +165,15 @@ export function PersistentPlayer() {
           >
             <Heart size={18} fill={liked ? 'currentColor' : 'none'} />
           </button>
+
+          {currentTrack && (
+            <TipButton
+              trackId={currentTrack.id}
+              creatorId={currentTrack.creator_id}
+              creatorUsername={currentTrack.artist_handle}
+              currentTimeMs={currentTimeMs}
+            />
+          )}
 
           {user && (
             <button

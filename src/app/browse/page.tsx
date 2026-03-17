@@ -7,6 +7,8 @@ import { Footer } from '@/components/Footer';
 import { useAuth, supabase } from '@/context/AuthContext';
 import { LikeButton } from '@/components/LikeButton';
 import { PersonalizedShelf } from '@/components/PersonalizedShelf';
+import { TipButton } from '@/components/tips/TipButton';
+import { VerifiedBadge } from '@/components/creators/VerifiedBadge';
 
 interface Track {
   id: string;
@@ -19,9 +21,11 @@ interface Track {
   is_remix: boolean;
   created_at: string;
   like_count?: number;
+  tip_count?: number;
   creator?: {
     username: string;
     display_name: string;
+    is_verified?: boolean;
   };
 }
 
@@ -50,7 +54,7 @@ export default function BrowsePage() {
       
       const { data: tracksData, error } = await supabase
         .from('tracks')
-        .select('*, creator:creator_id(username, display_name)')
+        .select('*, creator:creator_id(username, display_name, is_verified)')
         .order('created_at', { ascending: false })
         .range(offset, offset + itemsPerPage - 1);
 
@@ -102,7 +106,7 @@ export default function BrowsePage() {
       // Get tracks from followed creators
       const { data: tracksData, error } = await supabase
         .from('tracks')
-        .select('*, creator:creator_id(username, display_name)')
+        .select('*, creator:creator_id(username, display_name, is_verified)')
         .in('creator_id', followingIds)
         .order('created_at', { ascending: false })
         .range(offset, offset + itemsPerPage - 1);
@@ -222,13 +226,21 @@ export default function BrowsePage() {
                     <h3 className="font-bold text-white line-clamp-2 mb-2">
                       {track.title}
                     </h3>
-                    <p className="text-sm text-gray-400 mb-3">
+                    <p className="text-sm text-gray-400 mb-3 flex items-center gap-2">
                       by {track.creator?.display_name || track.creator?.username || track.artist_handle}
+                      <VerifiedBadge isVerified={track.creator?.is_verified} size="sm" />
                     </p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-500">
-                        {track.duration_seconds ? `${Math.floor(track.duration_seconds / 60)}:${(track.duration_seconds % 60).toString().padStart(2, '0')}` : '—'}
-                      </span>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1 text-xs text-gray-500">
+                        <span>
+                          {track.duration_seconds ? `${Math.floor(track.duration_seconds / 60)}:${(track.duration_seconds % 60).toString().padStart(2, '0')}` : '—'}
+                        </span>
+                        {track.tip_count ? (
+                          <span className="flex items-center gap-0.5">
+                            💰 {track.tip_count}
+                          </span>
+                        ) : null}
+                      </div>
                       <LikeButton trackId={track.id} initialLikes={track.like_count || 0} />
                     </div>
                   </div>
