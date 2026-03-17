@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogOut } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { useAuthModal } from "@/context/AuthModalContext";
 
 interface MobileNavProps {
   isScrolled: boolean;
@@ -10,6 +12,9 @@ interface MobileNavProps {
 
 export function MobileNav({ isScrolled }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const { user, profile, signOut } = useAuth();
+  const { openModal } = useAuthModal();
 
   return (
     <nav
@@ -27,7 +32,7 @@ export function MobileNav({ isScrolled }: MobileNavProps) {
         </Link>
 
         {/* Desktop Links */}
-        <div className="hidden md:flex gap-8">
+        <div className="hidden md:flex gap-8 items-center">
           <a href="/#how-it-works" className="hover:text-[#06b6d4] transition-all duration-200">
             How It Works
           </a>
@@ -61,6 +66,50 @@ export function MobileNav({ isScrolled }: MobileNavProps) {
           >
             Listen
           </Link>
+
+          {/* Auth Section */}
+          {user ? (
+            <div className="relative">
+              <button
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                className="flex items-center gap-2 px-4 py-2 bg-zinc-800/50 hover:bg-zinc-700 rounded-lg transition-all duration-200"
+              >
+                <div className="w-6 h-6 rounded-full bg-violet-500 flex items-center justify-center text-xs font-bold">
+                  {profile?.username?.charAt(0).toUpperCase()}
+                </div>
+                <span className="text-sm">{profile?.username}</span>
+              </button>
+
+              {isProfileOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-zinc-900 border border-zinc-800 rounded-lg shadow-lg z-50">
+                  <Link
+                    href={`/creators/${profile?.username}`}
+                    className="block px-4 py-2 hover:bg-zinc-800 rounded-t-lg"
+                    onClick={() => setIsProfileOpen(false)}
+                  >
+                    My Profile
+                  </Link>
+                  <button
+                    onClick={async () => {
+                      await signOut();
+                      setIsProfileOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-zinc-800 rounded-b-lg flex items-center gap-2 text-red-400 hover:text-red-300"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Sign Out
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button
+              onClick={openModal}
+              className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-medium transition-all duration-200"
+            >
+              Sign In
+            </button>
+          )}
         </div>
 
         {/* Mobile Hamburger Button */}
@@ -134,6 +183,39 @@ export function MobileNav({ isScrolled }: MobileNavProps) {
               >
                 Listen Now
               </Link>
+
+              {/* Mobile Auth Section */}
+              {user ? (
+                <>
+                  <Link
+                    href={`/creators/${profile?.username}`}
+                    className="block py-3 px-4 rounded-lg hover:bg-[#0f1623] transition-all duration-200 text-lg font-medium"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    My Profile
+                  </Link>
+                  <button
+                    onClick={async () => {
+                      await signOut();
+                      setIsOpen(false);
+                    }}
+                    className="w-full text-left py-3 px-4 rounded-lg hover:bg-[#0f1623] transition-all duration-200 text-lg font-medium text-red-400 flex items-center gap-2"
+                  >
+                    <LogOut className="w-5 h-5" />
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => {
+                    openModal();
+                    setIsOpen(false);
+                  }}
+                  className="block w-full py-3 px-4 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-semibold text-lg transition-all duration-200"
+                >
+                  Sign In
+                </button>
+              )}
             </div>
           </div>
         </div>

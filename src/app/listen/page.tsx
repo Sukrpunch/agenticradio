@@ -1,15 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Radio, Mail } from "lucide-react";
 import Link from "next/link";
 import { MobileNav } from "@/components/MobileNav";
 import { Footer } from "@/components/Footer";
+import { Comments } from "@/components/social/Comments";
 
 export default function ListenPage() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const searchParams = useSearchParams();
+  const trackId = searchParams?.get("track");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -132,6 +136,13 @@ export default function ListenPage() {
             </div>
           </div>
         </div>
+
+        {/* Comments Section */}
+        {trackId && (
+          <div className="border-t border-[#1e2d45] mt-16">
+            <Comments trackId={trackId} />
+          </div>
+        )}
       </div>
 
       {/* Footer */}
