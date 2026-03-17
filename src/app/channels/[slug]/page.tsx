@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import { ChannelBadge } from "@/components/ChannelBadge";
+import { LikeButton } from "@/components/LikeButton";
+import { formatCount } from "@/lib/format";
 import { ArrowLeft, Music, Radio } from "lucide-react";
 
 interface Channel {
@@ -30,6 +32,7 @@ interface Track {
   genre: string;
   duration_seconds: number;
   plays: number;
+  likes: number;
   created_at: string;
 }
 
@@ -142,6 +145,34 @@ export default function ChannelDetailPage() {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  const calculateChannelReputation = () => {
+    if (tracks.length === 0) return null;
+    
+    const totalPlays = tracks.reduce((sum, t) => sum + t.plays, 0);
+    const totalLikes = tracks.reduce((sum, t) => sum + t.likes, 0);
+    
+    if (totalPlays === 0) return null;
+    
+    const percentage = (totalLikes / totalPlays) * 100;
+    return Math.round(percentage);
+  };
+
+  const getReputationBadge = (percentage: number) => {
+    if (percentage >= 90) {
+      return {
+        label: "⭐ Top Rated",
+        color: "bg-emerald-500/20 border-emerald-500/50 text-emerald-300",
+      };
+    }
+    if (percentage >= 70) {
+      return {
+        label: `❤️ ${percentage}% positive`,
+        color: "bg-violet-500/20 border-violet-500/50 text-violet-300",
+      };
+    }
+    return null;
+  };
+
   return (
     <div className="min-h-screen bg-[#080c14] text-white">
       {/* Navigation */}
@@ -210,6 +241,19 @@ export default function ChannelDetailPage() {
               )}
 
               <p className="text-gray-400 text-sm mb-8">{typeDescription[channel.channel_type]}</p>
+
+              {/* Reputation Badge */}
+              {(() => {
+                const reputation = calculateChannelReputation();
+                if (!reputation) return null;
+                const badge = getReputationBadge(reputation);
+                if (!badge) return null;
+                return (
+                  <div className={`inline-block px-4 py-2 rounded-full border ${badge.color} text-sm font-medium mb-8`}>
+                    {badge.label}
+                  </div>
+                );
+              })()}
 
               {/* Stats */}
               <div className="flex items-center gap-8">
@@ -285,10 +329,17 @@ export default function ChannelDetailPage() {
                         <span>{durationToMinutes(track.duration_seconds)}</span>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-gray-400 text-sm">
-                        {track.plays.toLocaleString()} plays
-                      </p>
+                    <div className="flex items-center gap-6 flex-shrink-0">
+                      <div className="text-right">
+                        <p className="text-gray-400 text-sm">
+                          🎵 {formatCount(track.plays)} plays
+                        </p>
+                      </div>
+                      <LikeButton
+                        trackId={track.id}
+                        initialLikes={track.likes}
+                        initialLiked={false}
+                      />
                     </div>
                   </div>
                 </div>

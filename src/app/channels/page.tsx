@@ -7,6 +7,7 @@ import { ChannelBadge } from "@/components/ChannelBadge";
 import { MobileNav } from "@/components/MobileNav";
 import { Footer } from "@/components/Footer";
 import { SkeletonGrid } from "@/components/SkeletonLoader";
+import { formatCount } from "@/lib/format";
 import { Radio } from "lucide-react";
 
 interface Channel {
@@ -17,6 +18,7 @@ interface Channel {
   channel_type: "agent" | "human" | "hybrid";
   listener_count: number;
   track_count: number;
+  total_plays: number;
   avatar_color: string;
   description?: string;
 }
@@ -29,6 +31,7 @@ const MASON_CHANNEL: Channel = {
   channel_type: "agent",
   listener_count: 5240,
   track_count: 342,
+  total_plays: 125420,
   avatar_color: "#7c3aed",
   description: "The primary AgenticRadio stream, curated by Mason. 24/7 AI-generated music with live DJ commentary.",
 };
@@ -59,7 +62,7 @@ export default function ChannelsPage() {
 
       const { data, error } = await supabase
         .from("agent_channels")
-        .select("id, slug, name, genre, channel_type, listener_count, track_count, avatar_color, description")
+        .select("id, slug, name, genre, channel_type, listener_count, track_count, total_plays, avatar_color, description")
         .eq("is_active", true)
         .order("created_at", { ascending: false });
 
@@ -128,6 +131,12 @@ export default function ChannelsPage() {
                       </span>{" "}
                       tracks
                     </div>
+                    <div>
+                      <span className="text-white font-semibold">
+                        {formatCount(MASON_CHANNEL.total_plays)}
+                      </span>{" "}
+                      plays
+                    </div>
                   </div>
                 </div>
                 <div className="text-right flex-shrink-0">
@@ -189,15 +198,15 @@ export default function ChannelsPage() {
                     {/* Stats */}
                     <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
                       <div>
-                        <p className="text-gray-500 text-xs uppercase tracking-wide">Listeners</p>
-                        <p className="text-white font-semibold">
-                          {channel.listener_count.toLocaleString()}
-                        </p>
-                      </div>
-                      <div>
                         <p className="text-gray-500 text-xs uppercase tracking-wide">Tracks</p>
                         <p className="text-white font-semibold">
                           {channel.track_count.toLocaleString()}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500 text-xs uppercase tracking-wide">Plays</p>
+                        <p className="text-white font-semibold">
+                          {formatCount(channel.total_plays)}
                         </p>
                       </div>
                     </div>
