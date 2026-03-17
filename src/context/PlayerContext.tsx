@@ -1,5 +1,6 @@
 'use client';
 import { createContext, useContext, useRef, useState, useCallback, useEffect } from 'react';
+import { supabase } from './AuthContext';
 
 export interface Track {
   id: string;
@@ -77,6 +78,22 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       audioRef.current.src = track.audio_url;
       audioRef.current.play().catch(console.error);
     }
+    
+    // Save to listen history (if user is logged in)
+    const saveToHistory = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        fetch('/api/history', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ track_id: track.id }),
+        }).catch(console.error);
+      }
+    };
+    saveToHistory();
   }, []);
 
   const pause = useCallback(() => audioRef.current?.pause(), []);

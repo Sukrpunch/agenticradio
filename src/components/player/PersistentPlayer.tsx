@@ -1,13 +1,41 @@
 'use client';
 import { usePlayer } from '@/context/PlayerContext';
+import { useAuth, supabase } from '@/context/AuthContext';
 import { formatTime } from '@/lib/format';
-import { Heart, Play, Pause, SkipBack, SkipForward, Volume2 } from 'lucide-react';
+import { Heart, Play, Pause, SkipBack, SkipForward, Volume2, Plus } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { AddToPlaylistModal } from './AddToPlaylistModal';
 
 export function PersistentPlayer() {
   const { currentTrack, isPlaying, currentTimeMs, durationMs, volume, play, pause, resume, next, prev, seek, setVolume } = usePlayer();
+  const { user } = useAuth();
   const [liked, setLiked] = useState(false);
+  const [showPlaylistModal, setShowPlaylistModal] = useState(false);
+
+  // Check if track is liked
+  useEffect(() => {
+    if (!currentTrack || !user) {
+      setLiked(false);
+      return;
+    }
+
+    const checkLike = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const response = await fetch('/api/likes', {
+        headers: { 'Authorization': `Bearer ${session.access_token}` },
+      });
+
+      if (response.ok) {
+        const likedTracks = await response.json();
+        setLiked(likedTracks.some((t: any) => t.id === currentTrack.id));
+      }
+    };
+
+    checkLike();
+  }, [currentTrack, user]);
 
   if (!currentTrack) return null;
 
@@ -20,8 +48,34 @@ export function PersistentPlayer() {
   };
 
   const handleLike = async () => {
-    setLiked(!liked);
-    // TODO: Save to database via /api/likes
+    if (!user) return;
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    const newLikedState = !liked;
+
+    // Optimistic update
+    setLiked(newLikedState);
+
+    const response = await fetch(
+      newLikedState
+        ? '/api/likes'
+        : `/api/likes?track_id=${currentTrack?.id}`,
+      {
+        method: newLikedState ? 'POST' : 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: newLikedState ? JSON.stringify({ track_id: currentTrack?.id }) : undefined,
+      }
+    );
+
+    if (!response.ok) {
+      // Revert on error
+      setLiked(!newLikedState);
+    }
   };
 
   return (
@@ -105,17 +159,33 @@ export function PersistentPlayer() {
 
           <button
             onClick={handleLike}
-            className="text-zinc-400 hover:text-red-500 transition"
+            className={`transition ${liked ? 'text-red-500' : 'text-zinc-400 hover:text-red-500'}`}
             aria-label="Like track"
           >
             <Heart size={18} fill={liked ? 'currentColor' : 'none'} />
           </button>
+
+          {user && (
+            <button
+              onClick={() => setShowPlaylistModal(true)}
+              className="text-zinc-400 hover:text-violet-400 transition"
+              aria-label="Add to playlist"
+            >
+              <Plus size={18} />
+            </button>
+          )}
 
           <span className="text-xs text-zinc-500">
             {formatTime(currentTimeMs)} / {formatTime(durationMs)}
           </span>
         </div>
       </div>
+
+      <AddToPlaylistModal
+        open={showPlaylistModal}
+        trackId={currentTrack?.id || ''}
+        onClose={() => setShowPlaylistModal(false)}
+      />
     </div>
   );
 }

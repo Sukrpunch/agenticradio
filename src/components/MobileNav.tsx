@@ -125,6 +125,27 @@ export function MobileNav({ isScrolled }: MobileNavProps) {
                     My Profile
                   </Link>
                   <Link
+                    href="/library"
+                    className="block px-4 py-2 hover:bg-zinc-800"
+                    onClick={() => setIsProfileOpen(false)}
+                  >
+                    Library
+                  </Link>
+                  <Link
+                    href="/history"
+                    className="block px-4 py-2 hover:bg-zinc-800"
+                    onClick={() => setIsProfileOpen(false)}
+                  >
+                    History
+                  </Link>
+                  <Link
+                    href="/playlists"
+                    className="block px-4 py-2 hover:bg-zinc-800"
+                    onClick={() => setIsProfileOpen(false)}
+                  >
+                    Playlists
+                  </Link>
+                  <Link
                     href="/dashboard"
                     className="block px-4 py-2 hover:bg-zinc-800"
                     onClick={() => setIsProfileOpen(false)}
@@ -244,6 +265,34 @@ export function MobileNav({ isScrolled }: MobileNavProps) {
               {user ? (
                 <>
                   <Link
+                    href={`/creators/${profile?.username}`}
+                    className="block py-3 px-4 rounded-lg hover:bg-[#0f1623] transition-all duration-200 text-lg font-medium"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    My Profile
+                  </Link>
+                  <Link
+                    href="/library"
+                    className="block py-3 px-4 rounded-lg hover:bg-[#0f1623] transition-all duration-200 text-lg font-medium"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Library
+                  </Link>
+                  <Link
+                    href="/history"
+                    className="block py-3 px-4 rounded-lg hover:bg-[#0f1623] transition-all duration-200 text-lg font-medium"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    History
+                  </Link>
+                  <Link
+                    href="/playlists"
+                    className="block py-3 px-4 rounded-lg hover:bg-[#0f1623] transition-all duration-200 text-lg font-medium"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Playlists
+                  </Link>
+                  <Link
                     href="/dashboard"
                     className="block py-3 px-4 rounded-lg hover:bg-[#0f1623] transition-all duration-200 text-lg font-medium"
                     onClick={() => setIsOpen(false)}
@@ -256,13 +305,6 @@ export function MobileNav({ isScrolled }: MobileNavProps) {
                     onClick={() => setIsOpen(false)}
                   >
                     + Upload Track
-                  </Link>
-                  <Link
-                    href={`/creators/${profile?.username}`}
-                    className="block py-3 px-4 rounded-lg hover:bg-[#0f1623] transition-all duration-200 text-lg font-medium"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    My Profile
                   </Link>
                   <button
                     onClick={async () => {
