@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Radio, Mail } from "lucide-react";
 import Link from "next/link";
@@ -8,7 +8,7 @@ import { MobileNav } from "@/components/MobileNav";
 import { Footer } from "@/components/Footer";
 import { Comments } from "@/components/social/Comments";
 
-export default function ListenPage() {
+function ListenContent() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -148,5 +148,13 @@ export default function ListenPage() {
       {/* Footer */}
       <Footer />
     </div>
+  );
+}
+
+export default function ListenPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#080c14]" />}>
+      <ListenContent />
+    </Suspense>
   );
 }

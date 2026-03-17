@@ -6,6 +6,7 @@ import { Menu, X, LogOut, Mail } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useAuthModal } from "@/context/AuthModalContext";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { SearchBar } from "@/components/SearchBar";
 
 interface MobileNavProps {
   isScrolled: boolean;
@@ -33,47 +34,54 @@ export function MobileNav({ isScrolled }: MobileNavProps) {
         </Link>
 
         {/* Desktop Links */}
-        <div className="hidden md:flex gap-8 items-center">
-          <a href="/#how-it-works" className="hover:text-[#06b6d4] transition-all duration-200">
+        <div className="hidden md:flex gap-6 items-center flex-1 mx-8">
+          <a href="/#how-it-works" className="hover:text-[#06b6d4] transition-all duration-200 whitespace-nowrap">
             How It Works
           </a>
           <Link
             href="/request"
-            className="hover:text-[#06b6d4] transition-all duration-200"
+            className="hover:text-[#06b6d4] transition-all duration-200 whitespace-nowrap"
           >
             Request Line
           </Link>
           <Link
             href="/channels"
-            className="hover:text-[#06b6d4] transition-all duration-200"
+            className="hover:text-[#06b6d4] transition-all duration-200 whitespace-nowrap"
           >
             Channels
           </Link>
           <Link
             href="/creators"
-            className="hover:text-[#06b6d4] transition-all duration-200"
+            className="hover:text-[#06b6d4] transition-all duration-200 whitespace-nowrap"
           >
             For Creators
           </Link>
           <Link
             href="/developers"
-            className="hover:text-[#06b6d4] transition-all duration-200"
+            className="hover:text-[#06b6d4] transition-all duration-200 whitespace-nowrap"
           >
             Developers
           </Link>
           <Link
             href="/browse"
-            className="hover:text-[#06b6d4] transition-all duration-200"
+            className="hover:text-[#06b6d4] transition-all duration-200 whitespace-nowrap"
           >
             Browse
           </Link>
+
+          {/* Search Bar */}
+          <SearchBar className="flex-1 max-w-xs" />
+
           <Link
             href="/listen"
-            className="hover:text-[#7c3aed] transition-all duration-200"
+            className="hover:text-[#7c3aed] transition-all duration-200 whitespace-nowrap"
           >
             Listen
           </Link>
+        </div>
 
+        {/* Right Section */}
+        <div className="hidden md:flex gap-4 items-center">
           {/* Notifications & Messages (logged in only) */}
           {user && (
             <div className="flex items-center gap-4">
@@ -82,6 +90,16 @@ export function MobileNav({ isScrolled }: MobileNavProps) {
                 <Mail className="w-5 h-5" />
               </Link>
             </div>
+          )}
+
+          {/* Creator Features (logged in only) */}
+          {user && (
+            <Link
+              href="/dashboard"
+              className="text-sm px-4 py-2 bg-gradient-to-r from-violet-600 to-violet-500 hover:from-violet-500 hover:to-violet-400 text-white rounded-lg font-medium transition-all duration-200"
+            >
+              Dashboard
+            </Link>
           )}
 
           {/* Auth Section */}
@@ -105,6 +123,20 @@ export function MobileNav({ isScrolled }: MobileNavProps) {
                     onClick={() => setIsProfileOpen(false)}
                   >
                     My Profile
+                  </Link>
+                  <Link
+                    href="/dashboard"
+                    className="block px-4 py-2 hover:bg-zinc-800"
+                    onClick={() => setIsProfileOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    href="/upload"
+                    className="block px-4 py-2 hover:bg-zinc-800"
+                    onClick={() => setIsProfileOpen(false)}
+                  >
+                    + Upload Track
                   </Link>
                   <button
                     onClick={async () => {
@@ -211,6 +243,20 @@ export function MobileNav({ isScrolled }: MobileNavProps) {
               {/* Mobile Auth Section */}
               {user ? (
                 <>
+                  <Link
+                    href="/dashboard"
+                    className="block py-3 px-4 rounded-lg hover:bg-[#0f1623] transition-all duration-200 text-lg font-medium"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    href="/upload"
+                    className="block py-3 px-4 rounded-lg bg-gradient-to-r from-violet-600 to-violet-500 hover:from-violet-500 hover:to-violet-400 text-white font-semibold transition-all duration-200 text-lg"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    + Upload Track
+                  </Link>
                   <Link
                     href={`/creators/${profile?.username}`}
                     className="block py-3 px-4 rounded-lg hover:bg-[#0f1623] transition-all duration-200 text-lg font-medium"

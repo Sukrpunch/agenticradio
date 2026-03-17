@@ -8,7 +8,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { conversationId: string } }
+  { params }: { params: Promise<{ conversationId: string }> }
 ) {
   try {
     const authHeader = request.headers.get('authorization');
@@ -23,7 +23,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { conversationId } = params;
+    const { conversationId } = await params;
 
     // Verify user is participant
     const { data: conversation, error: convError } = await supabase

@@ -80,10 +80,18 @@ export async function POST(request: NextRequest) {
     }
 
     // Increment comment count on track
-    await supabase
+    const { data: trackData } = await supabase
       .from('tracks')
-      .update({ comment_count: supabase.raw('comment_count + 1') })
-      .eq('id', track_id);
+      .select('comment_count')
+      .eq('id', track_id)
+      .single();
+    
+    if (trackData) {
+      await supabase
+        .from('tracks')
+        .update({ comment_count: (trackData.comment_count || 0) + 1 })
+        .eq('id', track_id);
+    }
 
     // Send push notification to track owner (async, don't wait)
     const { data: track } = await supabase
@@ -163,10 +171,18 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Decrement comment count on track
-    await supabase
+    const { data: trackData } = await supabase
       .from('tracks')
-      .update({ comment_count: supabase.raw('GREATEST(0, comment_count - 1)') })
-      .eq('id', comment.track_id);
+      .select('comment_count')
+      .eq('id', comment.track_id)
+      .single();
+    
+    if (trackData) {
+      await supabase
+        .from('tracks')
+        .update({ comment_count: Math.max(0, (trackData.comment_count || 1) - 1) })
+        .eq('id', comment.track_id);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

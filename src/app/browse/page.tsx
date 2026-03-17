@@ -17,6 +17,7 @@ interface Track {
   is_collab: boolean;
   is_remix: boolean;
   created_at: string;
+  like_count?: number;
   creator?: {
     username: string;
     display_name: string;
@@ -224,7 +225,7 @@ export default function BrowsePage() {
                       <span className="text-xs text-gray-500">
                         {track.duration_seconds ? `${Math.floor(track.duration_seconds / 60)}:${(track.duration_seconds % 60).toString().padStart(2, '0')}` : '—'}
                       </span>
-                      <LikeButton trackId={track.id} />
+                      <LikeButton trackId={track.id} initialLikes={track.like_count || 0} />
                     </div>
                   </div>
                 </Link>

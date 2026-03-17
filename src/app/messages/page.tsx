@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Mail } from 'lucide-react';
 import Link from 'next/link';
@@ -38,7 +38,7 @@ const formatRelativeTime = (dateString: string): string => {
   return new Date(dateString).toLocaleDateString();
 };
 
-export default function MessagesPage() {
+function MessagesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
@@ -84,7 +84,7 @@ export default function MessagesPage() {
       if (newUserId) {
         // Find or create conversation and redirect
         const existing = convs?.find(
-          c => c.otherParticipant.id === newUserId
+          (c: any) => c.otherParticipant.id === newUserId
         );
         if (existing) {
           router.push(`/messages/${existing.id}`);
@@ -183,5 +183,13 @@ export default function MessagesPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function MessagesPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#080c14]" />}>
+      <MessagesContent />
+    </Suspense>
   );
 }
